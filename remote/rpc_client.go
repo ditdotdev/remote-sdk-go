@@ -5,8 +5,8 @@ package remote
 
 import (
 	"context"
-	proto "github.com/titan-data/remote-sdk-go/internal/proto"
-	"github.com/titan-data/remote-sdk-go/internal/util"
+	proto "github.com/datadatdat/remote-sdk-go/internal/proto"
+	"github.com/datadatdat/remote-sdk-go/internal/util"
 )
 
 type remoteRPCClient struct {

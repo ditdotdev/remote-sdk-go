@@ -3,7 +3,7 @@
  */
 package echo
 
-import "github.com/titan-data/remote-sdk-go/remote"
+import "github.com/datadatdat/remote-sdk-go/remote"
 
 type EchoRemote struct {
 }

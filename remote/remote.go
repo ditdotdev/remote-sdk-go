@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
-	"github.com/titan-data/remote-sdk-go/internal/proto"
+	"github.com/datadatdat/remote-sdk-go/internal/proto"
 	"google.golang.org/grpc"
 	"os"
 	"os/exec"

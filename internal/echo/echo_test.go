@@ -5,7 +5,7 @@ package echo
 
 import (
 	"github.com/stretchr/testify/assert"
-	"github.com/titan-data/remote-sdk-go/remote"
+	"github.com/datadatdat/remote-sdk-go/remote"
 	"testing"
 )
 
