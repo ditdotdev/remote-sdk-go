@@ -1,4 +1,4 @@
-module github.com/titan-data/remote-sdk-go
+module github.com/datadatdat/remote-sdk-go
 
 require (
 	github.com/fatih/structs v1.1.0
