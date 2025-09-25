@@ -166,6 +166,21 @@ jobs:
       - name: Build
         run: go build -v ./...
 
+      - name: Build echo binary for tests (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          mkdir -p build
+          go build -o build/echo ./cmd/echo
+
+      - name: Build echo binary for tests (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          mkdir -p build
+          go build -o build/echo.exe ./cmd/echo
+          # Create a copy without .exe extension for the Load function
+          cp build/echo.exe build/echo
+        shell: bash
+
       - name: Run tests
         run: |
           if [ "${{ runner.os }}" != "Windows" ]; then
