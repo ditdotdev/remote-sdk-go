@@ -17,7 +17,7 @@ on:
         default: false
 
 env:
-  GO_VERSION: '1.22'
+  GO_VERSION: '1.24'
   GOPRIVATE: github.com/datadatdat/*
   GONOPROXY: github.com/datadatdat/*
   GONOSUMDB: github.com/datadatdat/*
@@ -116,7 +116,7 @@ jobs:
       - name: Install golangci-lint
         uses: golangci/golangci-lint-action@v6
         with:
-          version: v1.61.0
+          version: v2.5.0
           args: --timeout=5m
 
   # Build and test across multiple versions
@@ -127,7 +127,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        go-version: ['1.21', '1.22', '1.23']
+        go-version: ['1.22', '1.23', '1.24']
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -191,11 +191,11 @@ jobs:
         shell: bash
 
       - name: Generate coverage report
-        if: matrix.os == 'ubuntu-latest' && matrix.go-version == '1.22'
+        if: matrix.os == 'ubuntu-latest' && matrix.go-version == '1.24'
         run: go tool cover -html=coverage.out -o coverage.html
 
       - name: Upload coverage to Codecov
-        if: matrix.os == 'ubuntu-latest' && matrix.go-version == '1.22'
+        if: matrix.os == 'ubuntu-latest' && matrix.go-version == '1.24'
         uses: codecov/codecov-action@v4
         with:
           file: ./coverage.out
@@ -204,7 +204,7 @@ jobs:
         continue-on-error: true
 
       - name: Upload coverage artifact
-        if: matrix.os == 'ubuntu-latest' && matrix.go-version == '1.22'
+        if: matrix.os == 'ubuntu-latest' && matrix.go-version == '1.24'
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
