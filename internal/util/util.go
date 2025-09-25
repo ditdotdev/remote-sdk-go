@@ -47,7 +47,7 @@ func elabValue(value *protobuf_struct.Value) (interface{}, error) {
 	if boolValue, ok := value.GetKind().(*protobuf_struct.Value_BoolValue); ok {
 		return boolValue.BoolValue, nil
 	}
-	return fmt.Errorf("Cannot convert the value %+v", value), nil
+	return fmt.Errorf("cannot convert the value %+v", value), nil
 }
 
 func Struct2Map(str *protobuf_struct.Struct) (map[string]interface{}, error) {
@@ -107,7 +107,7 @@ func elabEntry(entry interface{}) (*protobuf_struct.Value, error) {
 		structVal, err := Map2Struct(mapEntry)
 		return &protobuf_struct.Value{Kind: &protobuf_struct.Value_StructValue{StructValue: structVal}}, err
 	}
-	return nil, fmt.Errorf("Cannot convert [%+v] kind:%s", entry, rt.Kind())
+	return nil, fmt.Errorf("cannot convert [%+v] kind:%s", entry, rt.Kind())
 }
 
 func Map2Struct(input map[string]interface{}) (*protobuf_struct.Struct, error) {
