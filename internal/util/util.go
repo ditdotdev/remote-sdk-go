@@ -4,7 +4,6 @@
 package util
 
 import (
-	"errors"
 	"fmt"
 	"github.com/fatih/structs"
 	protobuf_struct "github.com/golang/protobuf/ptypes/struct"
@@ -74,7 +73,7 @@ func elabEntry(entry interface{}) (*protobuf_struct.Value, error) {
 		if realValue, ok := entry.(string); ok {
 			return &protobuf_struct.Value{Kind: &protobuf_struct.Value_StringValue{StringValue: realValue}}, nil
 		}
-		return nil, errors.New("cannot convert string value")
+		return nil, fmt.Errorf("cannot convert string value")
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		return &protobuf_struct.Value{Kind: &protobuf_struct.Value_NumberValue{NumberValue: float64(reflect.ValueOf(entry).Int())}}, nil
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
@@ -85,7 +84,7 @@ func elabEntry(entry interface{}) (*protobuf_struct.Value, error) {
 		if realValue, ok := entry.(bool); ok {
 			return &protobuf_struct.Value{Kind: &protobuf_struct.Value_BoolValue{BoolValue: realValue}}, nil
 		}
-		return nil, errors.New("cannot convert boolean value")
+		return nil, fmt.Errorf("cannot convert boolean value")
 	case reflect.Array, reflect.Slice:
 		lstEntry := reflect.ValueOf(entry)
 

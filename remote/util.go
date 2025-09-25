@@ -4,7 +4,6 @@
 package remote
 
 import (
-	"errors"
 	"fmt"
 	"net/url"
 	"sort"
