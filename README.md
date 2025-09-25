@@ -1,5 +1,3 @@
-<!-- Build trigger comment -->
-
 
 # About this Project
 
