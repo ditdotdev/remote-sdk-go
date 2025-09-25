@@ -30,14 +30,14 @@ func ParseURL(input string, properties map[string]string) (string, map[string]in
 
 	var r = Get(provider)
 	if r == nil {
-		return "", nil, nil, "", errors.New(fmt.Sprintf("unknown remote provider '%s'", provider))
+		return "", nil, nil, "", fmt.Errorf("unknown remote provider '%s'", provider)
 	}
 
 	commit := u.Fragment
 	tags := []string{}
 	for k := range u.Query() {
 		if k != "tag" {
-			return "", nil, nil, "", errors.New(fmt.Sprintf("invalid query parameter '%s'", k))
+			return "", nil, nil, "", fmt.Errorf("invalid query parameter '%s'", k)
 		}
 	}
 	if u.Query()["tag"] != nil {
@@ -129,7 +129,7 @@ func MatchTags(commit map[string]interface{}, query []Tag) bool {
 		for k, v := range raw {
 			tags[k] = v.(string)
 		}
-	} else if tags, ok = commit["tags"].(map[string]string); !ok {
+	}  else if tags, ok = commit["tags"].(map[string]string); !ok {
 		return false
 	}
 
