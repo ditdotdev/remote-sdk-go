@@ -48,7 +48,7 @@ func elabValue(value *protobuf_struct.Value) (interface{}, error) {
 	if boolValue, ok := value.GetKind().(*protobuf_struct.Value_BoolValue); ok {
 		return boolValue.BoolValue, nil
 	}
-	return fmt.Errorf("Cannot convert the value %+v", value), nil
+	return errors.New(fmt.Sprintf("Cannot convert the value %+v", value)), nil
 }
 
 func Struct2Map(str *protobuf_struct.Struct) (map[string]interface{}, error) {
@@ -89,7 +89,7 @@ func elabEntry(entry interface{}) (*protobuf_struct.Value, error) {
 	case reflect.Array, reflect.Slice:
 		lstEntry := reflect.ValueOf(entry)
 
-		lstValue := &protobuf_struct.ListValue{Values: make([]*protobuf_struct.Value, lstEntry.Len())}
+		lstValue := &protobuf_struct.ListValue{Values: make([]*protobuf_struct.Value, lstEntry.Len(), lstEntry.Len())}
 		for i := 0; i < lstEntry.Len(); i++ {
 			lstValue.Values[i], err = elabEntry(lstEntry.Index(i).Interface())
 			if err != nil {
@@ -108,7 +108,7 @@ func elabEntry(entry interface{}) (*protobuf_struct.Value, error) {
 		structVal, err := Map2Struct(mapEntry)
 		return &protobuf_struct.Value{Kind: &protobuf_struct.Value_StructValue{StructValue: structVal}}, err
 	}
-	return nil, fmt.Errorf("Cannot convert [%+v] kind:%s", entry, rt.Kind())
+	return nil, errors.New(fmt.Sprintf("Cannot convert [%+v] kind:%s", entry, rt.Kind()))
 }
 
 func Map2Struct(input map[string]interface{}) (*protobuf_struct.Struct, error) {
