@@ -177,8 +177,7 @@ jobs:
         run: |
           mkdir -p build
           go build -o build/echo.exe ./cmd/echo
-          # Create a copy without .exe extension for the Load function
-          cp build/echo.exe build/echo
+          # On Windows, the .exe extension is automatically added by the OS when needed
         shell: bash
 
       - name: Run tests
