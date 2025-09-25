@@ -6,12 +6,13 @@ package remote
 import (
 	"context"
 	"fmt"
-	"github.com/datadatdat/remote-sdk-go/internal/proto"
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
 	"google.golang.org/grpc"
 	"os"
 	"os/exec"
+
+	remote "github.com/datadatdat/remote-sdk-go/internal/proto"
 )
 
 /*
