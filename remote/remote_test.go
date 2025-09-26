@@ -10,6 +10,7 @@ import (
 
 func TestRegister(t *testing.T) {
 	Clear()
+
 	r := new(MockRemote)
 	r.On("Type").Return("mock")
 	Register(r)

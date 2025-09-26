@@ -1,75 +1,90 @@
 /*
  * Copyright The Titan Project Contributors.
  */
+
+// Package echo provides a sample echo remote implementation for testing and demonstration purposes.
 package echo
 
 import "github.com/datadatdat/remote-sdk-go/remote"
 
-type EchoRemote struct {
+// Remote is a sample remote implementation that echoes back test data for development and testing.
+type Remote struct {
 }
 
-func (m EchoRemote) Type() (string, error) {
+// Type returns the remote type identifier for the echo remote.
+func (m Remote) Type() (string, error) {
 	return "echo", nil
 }
 
-func (m EchoRemote) FromURL(url string, additionalProperties map[string]string) (map[string]interface{}, error) {
+// FromURL parses a URL and additional properties to create remote properties for the echo remote.
+func (m Remote) FromURL(url string, additionalProperties map[string]string) (map[string]interface{}, error) {
 	ret := map[string]interface{}{
 		"url": url,
 	}
 	for k, v := range additionalProperties {
 		ret[k] = v
 	}
+
 	return ret, nil
 }
 
-func (m EchoRemote) ToURL(properties map[string]interface{}) (string, map[string]string, error) {
+// ToURL converts remote properties back to a URL and additional properties.
+func (m Remote) ToURL(properties map[string]interface{}) (string, map[string]string, error) {
 	ret := map[string]string{}
 	for k, v := range properties {
 		ret[k] = v.(string)
 	}
+
 	return "echo://echo", ret, nil
 }
 
-func (m EchoRemote) GetParameters(remoteProperties map[string]interface{}) (map[string]interface{}, error) {
+// GetParameters extracts operation parameters from remote properties.
+func (m Remote) GetParameters(remoteProperties map[string]interface{}) (map[string]interface{}, error) {
 	return remoteProperties, nil
 }
 
-func (m EchoRemote) ValidateRemote(properties map[string]interface{}) error {
+// ValidateRemote validates the remote connection properties.
+func (m Remote) ValidateRemote(_ map[string]interface{}) error {
 	return nil
 }
 
-func (m EchoRemote) ValidateParameters(parameters map[string]interface{}) error {
+// ValidateParameters validates the operation parameters.
+func (m Remote) ValidateParameters(_ map[string]interface{}) error {
 	return nil
 }
 
-func (m EchoRemote) ListCommits(properties map[string]interface{}, parameters map[string]interface{}, tags []remote.Tag) ([]remote.Commit, error) {
+// ListCommits returns a list of available commits, optionally filtered by tags.
+func (m Remote) ListCommits(_ map[string]interface{}, _ map[string]interface{}, tags []remote.Tag) ([]remote.Commit, error) {
 	res := []remote.Commit{{
-		Id:         "one",
+		ID:         "one",
 		Properties: map[string]interface{}{"tags": map[string]interface{}{"name": "one"}, "timestamp": "2019-09-20T13:45:36Z"},
 	}, {
-		Id:         "two",
+		ID:         "two",
 		Properties: map[string]interface{}{"tags": map[string]interface{}{"name": "two"}, "timestamp": "2019-09-20T13:45:37Z"},
 	}}
 	n := 0
+
 	for _, c := range res {
 		if remote.MatchTags(c.Properties, tags) {
 			res[n] = c
 			n++
 		}
 	}
+
 	res = res[:n]
 	remote.SortCommits(res)
 
 	return res, nil
 }
 
-func (m EchoRemote) GetCommit(properties map[string]interface{}, parameters map[string]interface{}, commitId string) (*remote.Commit, error) {
-	if commitId == "echo" {
+// GetCommit retrieves a specific commit by its identifier.
+func (m Remote) GetCommit(_ map[string]interface{}, _ map[string]interface{}, commitID string) (*remote.Commit, error) {
+	if commitID == "echo" {
 		return &remote.Commit{
-			Id:         "echo",
+			ID:         "echo",
 			Properties: map[string]interface{}{"name": "echo", "timestamp": "2019-09-20T13:45:36Z"},
 		}, nil
-	} else {
-		return nil, nil
 	}
+
+	return nil, nil
 }

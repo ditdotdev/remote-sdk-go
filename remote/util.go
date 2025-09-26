@@ -1,20 +1,19 @@
 /*
  * Copyright The Titan Project Contributors.
  */
+
+// Package remote provides the core remote plugin infrastructure for Titan.
 package remote
 
 import (
-	"errors"
 	"fmt"
 	"net/url"
 	"sort"
 	"time"
 )
 
-/*
- * Wrap remote URL parsing in an easier-to use function that will handle converting to the intermediate URL format,
- * processing any query parameters (for tags) and fragment (for commit IDs).
- */
+// ParseURL wraps remote URL parsing in an easier-to use function that will handle converting to the intermediate URL format,
+// processing any query parameters (for tags) and fragment (for commit IDs).
 func ParseURL(input string, properties map[string]string) (string, map[string]interface{}, []string, string, error) {
 	u, err := url.Parse(input)
 	if err != nil {
@@ -30,22 +29,25 @@ func ParseURL(input string, properties map[string]string) (string, map[string]in
 
 	var r = Get(provider)
 	if r == nil {
-		return "", nil, nil, "", errors.New(fmt.Sprintf("unknown remote provider '%s'", provider))
+		return "", nil, nil, "", fmt.Errorf("unknown remote provider '%s'", provider)
 	}
 
 	commit := u.Fragment
 	tags := []string{}
+
 	for k := range u.Query() {
 		if k != "tag" {
-			return "", nil, nil, "", errors.New(fmt.Sprintf("invalid query parameter '%s'", k))
+			return "", nil, nil, "", fmt.Errorf("invalid query parameter '%s'", k)
 		}
 	}
+
 	if u.Query()["tag"] != nil {
 		tags = u.Query()["tag"]
 	}
 
 	u.RawQuery = ""
 	u.Fragment = ""
+
 	props, err := r.FromURL(u.String(), properties)
 	if err != nil {
 		return "", nil, nil, "", err
@@ -60,44 +62,45 @@ func contains(arr []string, search string) bool {
 			return true
 		}
 	}
+
 	return false
 }
 
 var epoch = time.Unix(0, 0)
 
 func getTimestamp(raw interface{}) time.Time {
-	var ts string
-	var ok bool
+	var (
+		ts string
+		ok bool
+	)
+
 	if ts, ok = raw.(string); ok {
 		if ts == "" {
 			return epoch
-		} else {
-			t, err := time.Parse(time.RFC3339, ts)
-			if err != nil {
-				return epoch
-			} else {
-				return t
-			}
 		}
-	} else {
-		return epoch
+
+		t, err := time.Parse(time.RFC3339, ts)
+		if err != nil {
+			return epoch
+		}
+
+		return t
 	}
+
+	return epoch
 }
 
-/**
- * Sorts a list of commits in reverse descending order, based on timestamp.
- */
+// SortCommits sorts a list of commits in reverse descending order, based on timestamp.
 func SortCommits(commits []Commit) {
 	sort.Slice(commits, func(i, j int) bool {
 		t1 := getTimestamp(commits[i].Properties["timestamp"])
 		t2 := getTimestamp(commits[j].Properties["timestamp"])
+
 		return t1.After(t2)
 	})
 }
 
-/*
- * Validate a set of properties (as with remotes and parameters) for required and optional fields.
- */
+// ValidateFields validates a set of properties (as with remotes and parameters) for required and optional fields.
 func ValidateFields(properties map[string]interface{}, required []string, optional []string) error {
 	for _, p := range required {
 		if _, ok := properties[p]; !ok {
@@ -114,9 +117,7 @@ func ValidateFields(properties map[string]interface{}, required []string, option
 	return nil
 }
 
-/*
- * Match a commit against a set of tags. Returns true if the commit matches the given tags, false otherwise.
- */
+// MatchTags matches a commit against a set of tags. Returns true if the commit matches the given tags, false otherwise.
 func MatchTags(commit map[string]interface{}, query []Tag) bool {
 	// No tags always matches
 	if len(query) == 0 {
@@ -124,12 +125,13 @@ func MatchTags(commit map[string]interface{}, query []Tag) bool {
 	}
 
 	var ok bool
+
 	tags := map[string]string{}
 	if raw, ok := commit["tags"].(map[string]interface{}); ok {
 		for k, v := range raw {
 			tags[k] = v.(string)
 		}
-	}  else if tags, ok = commit["tags"].(map[string]string); !ok {
+	} else if tags, ok = commit["tags"].(map[string]string); !ok {
 		return false
 	}
 

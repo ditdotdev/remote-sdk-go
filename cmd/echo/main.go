@@ -1,3 +1,4 @@
+// Package main provides the echo remote server executable.
 package main
 
 import (
@@ -9,6 +10,6 @@ type MockRemote struct {
 }
 
 func main() {
-	remote.Register(echo.EchoRemote{})
+	remote.Register(echo.Remote{})
 	remote.Serve("echo")
 }

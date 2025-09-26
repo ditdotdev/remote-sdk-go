@@ -12,10 +12,12 @@ import (
 
 func registerDefaultRemote() *MockRemote {
 	Clear()
+
 	r := new(MockRemote)
 	r.On("Type").Return("mock")
 	r.On("FromURL", mock.Anything, mock.Anything).Return(map[string]interface{}{}, nil)
 	Register(r)
+
 	return r
 }
 
@@ -85,6 +87,7 @@ func TestEmptyQueryParams(t *testing.T) {
 
 func TestProperties(t *testing.T) {
 	Clear()
+
 	r := new(MockRemote)
 	r.On("Type").Return("mock")
 	r.On("FromURL", mock.Anything, mock.Anything).Return(map[string]interface{}{"a": "b"}, nil)
@@ -98,6 +101,7 @@ func TestProperties(t *testing.T) {
 
 func TestBadProperties(t *testing.T) {
 	Clear()
+
 	r := new(MockRemote)
 	r.On("Type").Return("mock")
 	r.On("FromURL", mock.Anything, mock.Anything).Return(map[string]interface{}{}, errors.New("error"))
@@ -110,12 +114,14 @@ func TestBadProperties(t *testing.T) {
 
 func TestProviderArguments(t *testing.T) {
 	Clear()
+
 	r := new(MockRemote)
 	r.On("Type").Return("mock")
 	r.On("FromURL", mock.Anything, mock.Anything).Return(map[string]interface{}{}, nil)
 	Register(r)
 
 	_, _, _, _, _ = ParseURL("mock://user:pass@host:80/path", map[string]string{"a": "b"})
+
 	assert.Len(t, r.props, 1)
 	assert.Equal(t, "b", r.props["a"])
 	assert.Equal(t, "mock://user:pass@host:80/path", r.u)
@@ -125,9 +131,9 @@ func TestProviderArguments(t *testing.T) {
 func makeCommit(props map[string]string) map[string]interface{} {
 	if len(props) == 0 {
 		return map[string]interface{}{}
-	} else {
-		return map[string]interface{}{"tags": props}
 	}
+
+	return map[string]interface{}{"tags": props}
 }
 
 func existTag(key string) Tag {
@@ -185,75 +191,75 @@ func TestValidateInvalid(t *testing.T) {
 
 func TestSortDescending(t *testing.T) {
 	commits := []Commit{
-		{Id: "four", Properties: map[string]interface{}{"timestamp": "2019-09-21T13:45:30Z"}},
-		{Id: "one", Properties: map[string]interface{}{"timestamp": "2019-09-20T13:45:36Z"}},
-		{Id: "three", Properties: map[string]interface{}{"timestamp": "2019-09-20T13:45:38Z"}},
-		{Id: "two", Properties: map[string]interface{}{"timestamp": "2019-09-20T13:45:37Z"}},
+		{ID: "four", Properties: map[string]interface{}{"timestamp": "2019-09-21T13:45:30Z"}},
+		{ID: "one", Properties: map[string]interface{}{"timestamp": "2019-09-20T13:45:36Z"}},
+		{ID: "three", Properties: map[string]interface{}{"timestamp": "2019-09-20T13:45:38Z"}},
+		{ID: "two", Properties: map[string]interface{}{"timestamp": "2019-09-20T13:45:37Z"}},
 	}
 	SortCommits(commits)
 	assert.Len(t, commits, 4)
-	assert.Equal(t, "four", commits[0].Id)
-	assert.Equal(t, "three", commits[1].Id)
-	assert.Equal(t, "two", commits[2].Id)
-	assert.Equal(t, "one", commits[3].Id)
+	assert.Equal(t, "four", commits[0].ID)
+	assert.Equal(t, "three", commits[1].ID)
+	assert.Equal(t, "two", commits[2].ID)
+	assert.Equal(t, "one", commits[3].ID)
 }
 
 func TestSortMissingTimestamp(t *testing.T) {
 	commits := []Commit{
-		{Id: "four", Properties: map[string]interface{}{}},
-		{Id: "one", Properties: map[string]interface{}{"timestamp": "2019-09-20T13:45:36Z"}},
-		{Id: "three", Properties: map[string]interface{}{"timestamp": "2019-09-20T13:45:38Z"}},
-		{Id: "two", Properties: map[string]interface{}{"timestamp": "2019-09-20T13:45:37Z"}},
+		{ID: "four", Properties: map[string]interface{}{}},
+		{ID: "one", Properties: map[string]interface{}{"timestamp": "2019-09-20T13:45:36Z"}},
+		{ID: "three", Properties: map[string]interface{}{"timestamp": "2019-09-20T13:45:38Z"}},
+		{ID: "two", Properties: map[string]interface{}{"timestamp": "2019-09-20T13:45:37Z"}},
 	}
 	SortCommits(commits)
 	assert.Len(t, commits, 4)
-	assert.Equal(t, "three", commits[0].Id)
-	assert.Equal(t, "two", commits[1].Id)
-	assert.Equal(t, "one", commits[2].Id)
-	assert.Equal(t, "four", commits[3].Id)
+	assert.Equal(t, "three", commits[0].ID)
+	assert.Equal(t, "two", commits[1].ID)
+	assert.Equal(t, "one", commits[2].ID)
+	assert.Equal(t, "four", commits[3].ID)
 }
 
 func TestSortBadTimestampFormat(t *testing.T) {
 	commits := []Commit{
-		{Id: "four", Properties: map[string]interface{}{"timestamp": "foo"}},
-		{Id: "one", Properties: map[string]interface{}{"timestamp": "2019-09-20T13:45:36Z"}},
-		{Id: "three", Properties: map[string]interface{}{"timestamp": "2019-09-20T13:45:38Z"}},
-		{Id: "two", Properties: map[string]interface{}{"timestamp": "2019-09-20T13:45:37Z"}},
+		{ID: "four", Properties: map[string]interface{}{"timestamp": "foo"}},
+		{ID: "one", Properties: map[string]interface{}{"timestamp": "2019-09-20T13:45:36Z"}},
+		{ID: "three", Properties: map[string]interface{}{"timestamp": "2019-09-20T13:45:38Z"}},
+		{ID: "two", Properties: map[string]interface{}{"timestamp": "2019-09-20T13:45:37Z"}},
 	}
 	SortCommits(commits)
 	assert.Len(t, commits, 4)
-	assert.Equal(t, "three", commits[0].Id)
-	assert.Equal(t, "two", commits[1].Id)
-	assert.Equal(t, "one", commits[2].Id)
-	assert.Equal(t, "four", commits[3].Id)
+	assert.Equal(t, "three", commits[0].ID)
+	assert.Equal(t, "two", commits[1].ID)
+	assert.Equal(t, "one", commits[2].ID)
+	assert.Equal(t, "four", commits[3].ID)
 }
 
 func TestSortEmptyTimestamp(t *testing.T) {
 	commits := []Commit{
-		{Id: "four", Properties: map[string]interface{}{"timestamp": ""}},
-		{Id: "one", Properties: map[string]interface{}{"timestamp": "2019-09-20T13:45:36Z"}},
-		{Id: "three", Properties: map[string]interface{}{"timestamp": "2019-09-20T13:45:38Z"}},
-		{Id: "two", Properties: map[string]interface{}{"timestamp": "2019-09-20T13:45:37Z"}},
+		{ID: "four", Properties: map[string]interface{}{"timestamp": ""}},
+		{ID: "one", Properties: map[string]interface{}{"timestamp": "2019-09-20T13:45:36Z"}},
+		{ID: "three", Properties: map[string]interface{}{"timestamp": "2019-09-20T13:45:38Z"}},
+		{ID: "two", Properties: map[string]interface{}{"timestamp": "2019-09-20T13:45:37Z"}},
 	}
 	SortCommits(commits)
 	assert.Len(t, commits, 4)
-	assert.Equal(t, "three", commits[0].Id)
-	assert.Equal(t, "two", commits[1].Id)
-	assert.Equal(t, "one", commits[2].Id)
-	assert.Equal(t, "four", commits[3].Id)
+	assert.Equal(t, "three", commits[0].ID)
+	assert.Equal(t, "two", commits[1].ID)
+	assert.Equal(t, "one", commits[2].ID)
+	assert.Equal(t, "four", commits[3].ID)
 }
 
 func TestSortBadTimestamp(t *testing.T) {
 	commits := []Commit{
-		{Id: "four", Properties: map[string]interface{}{"timestamp": 4}},
-		{Id: "one", Properties: map[string]interface{}{"timestamp": "2019-09-20T13:45:36Z"}},
-		{Id: "three", Properties: map[string]interface{}{"timestamp": "2019-09-20T13:45:38Z"}},
-		{Id: "two", Properties: map[string]interface{}{"timestamp": "2019-09-20T13:45:37Z"}},
+		{ID: "four", Properties: map[string]interface{}{"timestamp": 4}},
+		{ID: "one", Properties: map[string]interface{}{"timestamp": "2019-09-20T13:45:36Z"}},
+		{ID: "three", Properties: map[string]interface{}{"timestamp": "2019-09-20T13:45:38Z"}},
+		{ID: "two", Properties: map[string]interface{}{"timestamp": "2019-09-20T13:45:37Z"}},
 	}
 	SortCommits(commits)
 	assert.Len(t, commits, 4)
-	assert.Equal(t, "three", commits[0].Id)
-	assert.Equal(t, "two", commits[1].Id)
-	assert.Equal(t, "one", commits[2].Id)
-	assert.Equal(t, "four", commits[3].Id)
+	assert.Equal(t, "three", commits[0].ID)
+	assert.Equal(t, "two", commits[1].ID)
+	assert.Equal(t, "one", commits[2].ID)
+	assert.Equal(t, "four", commits[3].ID)
 }

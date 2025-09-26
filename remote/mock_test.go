@@ -24,6 +24,7 @@ func (r *MockRemote) FromURL(url string, additionalProperties map[string]string)
 	r.props = additionalProperties
 
 	args := r.Called(url, additionalProperties)
+
 	return args.Get(0).(map[string]interface{}), args.Error(1)
 }
 
@@ -52,7 +53,7 @@ func (r *MockRemote) ListCommits(properties map[string]interface{}, parameters m
 	return args.Get(0).([]Commit), args.Error(1)
 }
 
-func (r *MockRemote) GetCommit(properties map[string]interface{}, parameters map[string]interface{}, commitId string) (*Commit, error) {
-	args := r.Called(properties, parameters, commitId)
+func (r *MockRemote) GetCommit(properties map[string]interface{}, parameters map[string]interface{}, commitID string) (*Commit, error) {
+	args := r.Called(properties, parameters, commitID)
 	return args.Get(0).(*Commit), args.Error(1)
 }

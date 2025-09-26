@@ -1,6 +1,8 @@
 /*
  * Copyright The Titan Project Contributors.
  */
+
+// Package remote provides the core remote plugin infrastructure for Titan.
 package remote
 
 import (
@@ -8,26 +10,30 @@ import (
 	"fmt"
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
-	"github.com/datadatdat/remote-sdk-go/internal/proto"
 	"google.golang.org/grpc"
 	"os"
 	"os/exec"
+
+	remote "github.com/datadatdat/remote-sdk-go/internal/proto"
 )
 
 /*
  * SDK for Titan remotes.
  */
 
+// Tag represents a filter criteria for listing commits, with a key-value pair for matching.
 type Tag struct {
 	Key   string
 	Value *string
 }
 
+// Commit represents a data snapshot with an identifier and associated properties.
 type Commit struct {
-	Id         string
+	ID         string
 	Properties map[string]interface{}
 }
 
+// Remote defines the interface for remote storage backends that can store and retrieve commits.
 type Remote interface {
 
 	/*
@@ -85,7 +91,7 @@ type Remote interface {
 	/**
 	 * Fetches a single commit from the given remote. Returns nil if no such commit exists.
 	 */
-	GetCommit(properties map[string]interface{}, parameters map[string]interface{}, commitId string) (*Commit, error)
+	GetCommit(properties map[string]interface{}, parameters map[string]interface{}, commitID string) (*Commit, error)
 }
 
 type remotePlugin struct {
@@ -93,12 +99,12 @@ type remotePlugin struct {
 	Impl Remote
 }
 
-func (p *remotePlugin) GRPCServer(broker *plugin.GRPCBroker, s *grpc.Server) error {
+func (p *remotePlugin) GRPCServer(_ *plugin.GRPCBroker, s *grpc.Server) error {
 	remote.RegisterRemoteServer(s, &remoteRPCServer{Impl: p.Impl})
 	return nil
 }
 
-func (remotePlugin) GRPCClient(ctx context.Context, broker *plugin.GRPCBroker, c *grpc.ClientConn) (interface{}, error) {
+func (remotePlugin) GRPCClient(_ context.Context, _ *plugin.GRPCBroker, c *grpc.ClientConn) (interface{}, error) {
 	return &remoteRPCClient{Client: remote.NewRemoteClient(c)}, nil
 }
 
@@ -110,33 +116,30 @@ type loadedRemote struct {
 var registeredRemotes = map[string]Remote{}
 var loadedRemotes = map[string]loadedRemote{}
 
-/*
- * Register a new remote. This should be called from the init() function of a remote implementation. The remotes can
- * later be accessed via the Get() method.
- */
+// Register a new remote. This should be called from the init() function of a remote implementation. The remotes can
+// later be accessed via the Get() method.
 func Register(remote Remote) {
-	remoteType, error := remote.Type()
-	if error != nil {
-		panic(error)
+	remoteType, err := remote.Type()
+	if err != nil {
+		panic(err)
 	}
+
 	registeredRemotes[remoteType] = remote
 }
 
-/*
- * Get a remote by type.
- */
+// Get a remote by type.
 func Get(remoteType string) Remote {
 	return registeredRemotes[remoteType]
 }
 
-/*
- * Clear any registered or loaded remotes. Should only be used for testing.
- */
+// Clear any registered or loaded remotes. Should only be used for testing.
 func Clear() {
 	registeredRemotes = map[string]Remote{}
+
 	for _, v := range loadedRemotes {
 		v.c.Kill()
 	}
+
 	loadedRemotes = map[string]loadedRemote{}
 }
 
@@ -146,9 +149,7 @@ var handshakeConfig = plugin.HandshakeConfig{
 	MagicCookieValue: "dba4fe2b-56ff-4a16-9bfc-bf651b8f12d6",
 }
 
-/*
- * Run the remote as a plugin server, to be invoked from the main method of the remote implementation.
- */
+// Serve runs the remote as a plugin server, to be invoked from the main method of the remote implementation.
 func Serve(remoteType string) {
 	logger := hclog.New(&hclog.LoggerOptions{
 		Name:   "remote",
@@ -157,6 +158,7 @@ func Serve(remoteType string) {
 	})
 
 	remote := Get(remoteType)
+
 	var pluginMap = map[string]plugin.Plugin{
 		"remote": &remotePlugin{Impl: remote},
 	}
@@ -169,9 +171,7 @@ func Serve(remoteType string) {
 	})
 }
 
-/*
- * Load a remote via the plugin interface. These plugins will remain loaded until Unload() or Clear() is called.
- */
+// Load a remote via the plugin interface. These plugins will remain loaded until Unload() or Clear() is called.
 func Load(remoteType string, pluginPath string) (Remote, error) {
 	if v, ok := loadedRemotes[remoteType]; ok {
 		return v.r, nil
@@ -184,6 +184,7 @@ func Load(remoteType string, pluginPath string) (Remote, error) {
 	})
 
 	remote := Get(remoteType)
+
 	var pluginMap = map[string]plugin.Plugin{
 		"remote": &remotePlugin{Impl: remote},
 	}
@@ -191,7 +192,7 @@ func Load(remoteType string, pluginPath string) (Remote, error) {
 	client := plugin.NewClient(&plugin.ClientConfig{
 		HandshakeConfig:  handshakeConfig,
 		Plugins:          pluginMap,
-		Cmd:              exec.Command(fmt.Sprintf("%s/%s", pluginPath, remoteType)),
+		Cmd:              exec.Command(fmt.Sprintf("%s/%s", pluginPath, remoteType)), //nolint:gosec // pluginPath and remoteType are controlled inputs
 		Logger:           logger,
 		AllowedProtocols: []plugin.Protocol{plugin.ProtocolGRPC},
 	})
@@ -216,6 +217,7 @@ func Load(remoteType string, pluginPath string) (Remote, error) {
 	return raw.(Remote), nil
 }
 
+// Unload terminates and removes a loaded remote plugin from memory.
 func Unload(remoteType string) {
 	if val, ok := loadedRemotes[remoteType]; ok {
 		val.c.Kill()

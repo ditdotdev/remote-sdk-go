@@ -1,9 +1,18 @@
+
 # About this Project
 
 This project provides a common set of interfaces for remote providers (such
 as SSH and S3). Titan does not yet provide a way to dynamically load
 remote providers, but this SDK provides a means for providers to have their
 own dedicated repositories.
+
+## CI/CD Pipeline
+
+This repository now includes a comprehensive Pull Request 2 workflow with:
+- Cross-platform testing (Ubuntu, Windows, macOS)
+- Multi-version Go support (1.21, 1.22, 1.23)
+- Security scanning and code quality checks
+- Coverage reporting and performance benchmarks
 
 ## Contributing
 
