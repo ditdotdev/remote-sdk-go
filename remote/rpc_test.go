@@ -10,12 +10,13 @@ import (
 
 func getEcho(t *testing.T) Remote {
 	Clear()
+
 	r, err := Load("echo", "../build")
 	if assert.NoError(t, err) {
 		return r
-	} else {
-		return nil
 	}
+	
+	return nil
 }
 
 func TestPluginType(t *testing.T) {
@@ -86,9 +87,9 @@ func TestListCommits(t *testing.T) {
 		commits, err := e.ListCommits(map[string]interface{}{}, map[string]interface{}{}, []Tag{})
 		if assert.NoError(t, err) {
 			assert.Len(t, commits, 2)
-			assert.Equal(t, "two", commits[0].Id)
+			assert.Equal(t, "two", commits[0].ID)
 			assert.Equal(t, "two", commits[0].Properties["tags"].(map[string]interface{})["name"])
-			assert.Equal(t, "one", commits[1].Id)
+			assert.Equal(t, "one", commits[1].ID)
 			assert.Equal(t, "one", commits[1].Properties["tags"].(map[string]interface{})["name"])
 		}
 	}
@@ -98,10 +99,11 @@ func TestListCommitsFilter(t *testing.T) {
 	e := getEcho(t)
 	if assert.NotNil(t, e) {
 		search := "one"
+
 		commits, err := e.ListCommits(map[string]interface{}{}, map[string]interface{}{}, []Tag{{Key: "name", Value: &search}})
 		if assert.NoError(t, err) {
 			assert.Len(t, commits, 1)
-			assert.Equal(t, "one", commits[0].Id)
+			assert.Equal(t, "one", commits[0].ID)
 		}
 	}
 }
@@ -111,7 +113,7 @@ func TestGetCommit(t *testing.T) {
 	if assert.NotNil(t, e) {
 		commit, err := e.GetCommit(map[string]interface{}{}, map[string]interface{}{}, "echo")
 		if assert.NoError(t, err) {
-			assert.Equal(t, "echo", commit.Id)
+			assert.Equal(t, "echo", commit.ID)
 		}
 	}
 }

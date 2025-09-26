@@ -10,7 +10,8 @@ import (
 )
 
 func TestType(t *testing.T) {
-	e := EchoRemote{}
+	e := Remote{}
+
 	typ, err := e.Type()
 	if assert.NoError(t, err) {
 		assert.Equal(t, "echo", typ)
@@ -18,7 +19,8 @@ func TestType(t *testing.T) {
 }
 
 func TestToURL(t *testing.T) {
-	e := EchoRemote{}
+	e := Remote{}
+
 	u, props, err := e.ToURL(map[string]interface{}{"a": "b"})
 	if assert.NoError(t, err) {
 		assert.Equal(t, "echo://echo", u)
@@ -28,7 +30,8 @@ func TestToURL(t *testing.T) {
 }
 
 func TestFromURL(t *testing.T) {
-	e := EchoRemote{}
+	e := Remote{}
+
 	res, err := e.FromURL("echo://echo", map[string]string{"a": "b"})
 	if assert.NoError(t, err) {
 		assert.Len(t, res, 2)
@@ -38,7 +41,8 @@ func TestFromURL(t *testing.T) {
 }
 
 func TestGetParameters(t *testing.T) {
-	e := EchoRemote{}
+	e := Remote{}
+
 	res, err := e.GetParameters(map[string]interface{}{"a": "b"})
 	if assert.NoError(t, err) {
 		assert.Len(t, res, 1)
@@ -47,49 +51,53 @@ func TestGetParameters(t *testing.T) {
 }
 
 func TestValidateRemote(t *testing.T) {
-	e := EchoRemote{}
+	e := Remote{}
 	err := e.ValidateRemote(map[string]interface{}{})
 	assert.NoError(t, err)
 }
 
 func TestValidateParameters(t *testing.T) {
-	e := EchoRemote{}
+	e := Remote{}
 	err := e.ValidateParameters(map[string]interface{}{})
 	assert.NoError(t, err)
 }
 
 func TestListCommits(t *testing.T) {
-	e := EchoRemote{}
+	e := Remote{}
+
 	commits, err := e.ListCommits(map[string]interface{}{}, map[string]interface{}{}, []remote.Tag{})
 	if assert.NoError(t, err) {
 		assert.Len(t, commits, 2)
-		assert.Equal(t, "two", commits[0].Id)
+		assert.Equal(t, "two", commits[0].ID)
 		assert.Equal(t, "two", commits[0].Properties["tags"].(map[string]interface{})["name"])
-		assert.Equal(t, "one", commits[1].Id)
+		assert.Equal(t, "one", commits[1].ID)
 		assert.Equal(t, "one", commits[1].Properties["tags"].(map[string]interface{})["name"])
 	}
 }
 
 func TestListCommitsFilter(t *testing.T) {
-	e := EchoRemote{}
+	e := Remote{}
 	search := "one"
+
 	commits, err := e.ListCommits(map[string]interface{}{}, map[string]interface{}{}, []remote.Tag{{Key: "name", Value: &search}})
 	if assert.NoError(t, err) {
 		assert.Len(t, commits, 1)
-		assert.Equal(t, "one", commits[0].Id)
+		assert.Equal(t, "one", commits[0].ID)
 	}
 }
 
 func TestGetCommit(t *testing.T) {
-	e := EchoRemote{}
+	e := Remote{}
+
 	commit, err := e.GetCommit(map[string]interface{}{}, map[string]interface{}{}, "echo")
 	if assert.NoError(t, err) {
-		assert.Equal(t, "echo", commit.Id)
+		assert.Equal(t, "echo", commit.ID)
 	}
 }
 
 func TestGetMissingCommit(t *testing.T) {
-	e := EchoRemote{}
+	e := Remote{}
+
 	commit, err := e.GetCommit(map[string]interface{}{}, map[string]interface{}{}, "foo")
 	if assert.NoError(t, err) {
 		assert.Nil(t, commit)
