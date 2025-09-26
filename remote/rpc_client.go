@@ -176,7 +176,7 @@ func (r remoteRPCClient) GetCommit(properties map[string]interface{}, parameters
 	if res.GetCommitNull() {
 		return nil, nil
 	}
-	
+
 	props, err := conversion.Struct2Map(res.GetCommitValue().Properties)
 	if err != nil {
 		return nil, err

@@ -78,15 +78,15 @@ func getTimestamp(raw interface{}) time.Time {
 		if ts == "" {
 			return epoch
 		}
-		
+
 		t, err := time.Parse(time.RFC3339, ts)
 		if err != nil {
 			return epoch
 		}
-		
+
 		return t
 	}
-	
+
 	return epoch
 }
 

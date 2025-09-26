@@ -85,6 +85,6 @@ func (m Remote) GetCommit(_ map[string]interface{}, _ map[string]interface{}, co
 			Properties: map[string]interface{}{"name": "echo", "timestamp": "2019-09-20T13:45:36Z"},
 		}, nil
 	}
-	
+
 	return nil, nil
 }

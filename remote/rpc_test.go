@@ -15,7 +15,7 @@ func getEcho(t *testing.T) Remote {
 	if assert.NoError(t, err) {
 		return r
 	}
-	
+
 	return nil
 }
 

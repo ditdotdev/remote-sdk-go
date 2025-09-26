@@ -158,7 +158,7 @@ func (r *remoteRPCServer) GetCommit(_ context.Context, req *proto.GetCommitReque
 			Commit: &proto.GetCommitResponse_CommitNull{CommitNull: true},
 		}, nil
 	}
-	
+
 	s, err := conversion.Map2Struct(commit.Properties)
 	if err != nil {
 		return nil, err

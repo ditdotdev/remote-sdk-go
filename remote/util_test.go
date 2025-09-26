@@ -132,7 +132,7 @@ func makeCommit(props map[string]string) map[string]interface{} {
 	if len(props) == 0 {
 		return map[string]interface{}{}
 	}
-	
+
 	return map[string]interface{}{"tags": props}
 }
 
