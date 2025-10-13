@@ -1,0 +1,23 @@
+#!/bin/bash
+
+BASENAME=$1
+RUNNEROS=$2
+
+echo -n ::set-output name=binary_name::
+case $RUNNEROS in
+  Linux)
+    echo ${BASENAME}-linux
+    ;;
+
+  macOS)
+    echo ${BASENAME}-darwin
+    ;;
+
+  Windows)
+    echo ${BASENAME}-windows
+    ;;
+
+  *)
+    echo $BASENAME
+    ;;
+esac
