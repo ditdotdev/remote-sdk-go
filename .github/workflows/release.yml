@@ -57,7 +57,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Get Binary Name
         id: binary_name
-        run: ./.github/get-binary-name echo ${{ runner.os }}
+        run: |
+          chmod +x ./.github/get-binary-name
+          ./.github/get-binary-name echo ${{ runner.os }}
       - name: Build
         run: go build -o build/echo ./cmd/echo
         env:
