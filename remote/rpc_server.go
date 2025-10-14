@@ -1,8 +1,8 @@
 /*
- * Copyright The Titan Project Contributors.
+ * Copyright Datadatdat.
  */
 
-// Package remote provides the core remote plugin infrastructure for Titan.
+// Package remote provides the core remote plugin infrastructure for Datadatdat.
 package remote
 
 import (

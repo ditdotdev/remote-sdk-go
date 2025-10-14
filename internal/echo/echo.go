@@ -1,5 +1,5 @@
 /*
- * Copyright The Titan Project Contributors.
+ * Copyright Datadatdat.
  */
 
 // Package echo provides a sample echo remote implementation for testing and demonstration purposes.

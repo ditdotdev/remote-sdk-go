@@ -1,8 +1,8 @@
 /*
- * Copyright The Titan Project Contributors.
+ * Copyright Datadatdat.
  */
 
-// Package remote provides the core remote plugin infrastructure for Titan.
+// Package remote provides the core remote plugin infrastructure for Datadatdat.
 package remote
 
 import (
@@ -18,7 +18,7 @@ import (
 )
 
 /*
- * SDK for Titan remotes.
+ * SDK for Datadatdat remotes.
  */
 
 // Tag represents a filter criteria for listing commits, with a key-value pair for matching.
@@ -145,7 +145,7 @@ func Clear() {
 
 var handshakeConfig = plugin.HandshakeConfig{
 	ProtocolVersion:  1,
-	MagicCookieKey:   "titan",
+	MagicCookieKey:   "Datadatdat",
 	MagicCookieValue: "dba4fe2b-56ff-4a16-9bfc-bf651b8f12d6",
 }
 
