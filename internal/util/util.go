@@ -7,9 +7,10 @@ package conversion
 
 import (
 	"fmt"
+	"reflect"
+
 	"github.com/fatih/structs"
 	protobuf_struct "github.com/golang/protobuf/ptypes/struct"
-	"reflect"
 )
 
 func elabValue(value *protobuf_struct.Value) (interface{}, error) {
@@ -67,6 +68,9 @@ func Struct2Map(str *protobuf_struct.Struct) (map[string]interface{}, error) {
 	var err error
 
 	result := make(map[string]interface{})
+	if str == nil {
+		return result, nil
+	}
 	for k, v := range str.Fields {
 		result[k], err = elabValue(v)
 		if err != nil {
