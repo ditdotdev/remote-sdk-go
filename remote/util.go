@@ -20,16 +20,22 @@ func ParseURL(input string, properties map[string]string) (string, map[string]in
 		return "", nil, nil, "", err
 	}
 
-	var provider string
+	var scheme string
 	if u.Scheme != "" {
-		provider = u.Scheme
+		scheme = u.Scheme
 	} else {
-		provider = u.Path
+		scheme = u.Path
 	}
 
-	var r = Get(provider)
+	var r = Get(scheme)
 	if r == nil {
-		return "", nil, nil, "", fmt.Errorf("unknown remote provider '%s'", provider)
+		return "", nil, nil, "", fmt.Errorf("unknown remote provider '%s'", scheme)
+	}
+
+	// Get the actual provider type from the Remote implementation
+	provider, err := r.Type()
+	if err != nil {
+		return "", nil, nil, "", err
 	}
 
 	commit := u.Fragment
