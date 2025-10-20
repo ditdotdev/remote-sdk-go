@@ -20,24 +20,6 @@ func ParseURL(input string, properties map[string]string) (string, map[string]in
 		return "", nil, nil, "", err
 	}
 
-	var scheme string
-	if u.Scheme != "" {
-		scheme = u.Scheme
-	} else {
-		scheme = u.Path
-	}
-
-	var r = Get(scheme)
-	if r == nil {
-		return "", nil, nil, "", fmt.Errorf("unknown remote provider '%s'", scheme)
-	}
-
-	// Get the actual provider type from the Remote implementation
-	provider, err := r.Type()
-	if err != nil {
-		return "", nil, nil, "", err
-	}
-
 	commit := u.Fragment
 	tags := []string{}
 
@@ -53,13 +35,31 @@ func ParseURL(input string, properties map[string]string) (string, map[string]in
 
 	u.RawQuery = ""
 	u.Fragment = ""
+	urlWithoutQueryAndFragment := u.String()
 
-	props, err := r.FromURL(u.String(), properties)
-	if err != nil {
-		return "", nil, nil, "", err
+	// Try to find a provider that can handle this URL by attempting to parse it with each registered provider
+	for _, r := range registeredRemotes {
+		props, err := r.FromURL(urlWithoutQueryAndFragment, properties)
+		if err == nil {
+			// This provider successfully parsed the URL
+			provider, err := r.Type()
+			if err != nil {
+				continue
+			}
+			return provider, props, tags, commit, nil
+		}
+		// Continue trying other providers if this one failed
 	}
 
-	return provider, props, tags, commit, nil
+	// If no provider could parse the URL, try the legacy scheme-based lookup for backwards compatibility
+	var scheme string
+	if u.Scheme != "" {
+		scheme = u.Scheme
+	} else {
+		scheme = u.Path
+	}
+
+	return "", nil, nil, "", fmt.Errorf("no remote provider found that can handle URI '%s' (tried scheme '%s')", input, scheme)
 }
 
 func contains(arr []string, search string) bool {

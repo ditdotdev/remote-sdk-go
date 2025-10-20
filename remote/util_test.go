@@ -5,20 +5,37 @@ package remote
 
 import (
 	"errors"
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"testing"
 )
+
+// Custom mock implementation that only handles "mock" scheme
+type SchemaAwareMockRemote struct {
+	MockRemote
+}
+
+func (r *SchemaAwareMockRemote) FromURL(url string, additionalProperties map[string]string) (map[string]interface{}, error) {
+	// Only accept URLs with "mock" scheme
+	if url == "mock" || url == "mock:" || (len(url) >= 7 && url[:7] == "mock://") {
+		r.u = url
+		r.props = additionalProperties
+		args := r.Called(url, additionalProperties)
+		return args.Get(0).(map[string]interface{}), args.Error(1)
+	}
+	return nil, errors.New("unsupported URL scheme for mock provider")
+}
 
 func registerDefaultRemote() *MockRemote {
 	Clear()
 
-	r := new(MockRemote)
-	r.On("Type").Return("mock")
+	r := new(SchemaAwareMockRemote)
+	r.On("Type").Return("mock", nil)
 	r.On("FromURL", mock.Anything, mock.Anything).Return(map[string]interface{}{}, nil)
 	Register(r)
 
-	return r
+	return &r.MockRemote
 }
 
 func TestProvider(t *testing.T) {
