@@ -37,7 +37,7 @@ jobs:
           echo "Looking for published release with tag: $TAG_NAME"
           
           # Try to find existing draft release for this tag
-          UPLOAD_URL=$(curl -sH "Authorization: token $GITHUB_TOKEN" \
+          UPLOAD_URL=$(curl -sH "Authorization: token $GO_MODULES_TOKEN" \
             "https://api.github.com/repos/$GITHUB_REPOSITORY/releases" | \
             jq -rc --arg tag "$TAG_NAME" '.[] | select(.draft and .tag_name == $tag) | .upload_url')
           
@@ -46,7 +46,7 @@ jobs:
             echo "upload_url=$UPLOAD_URL" >> $GITHUB_OUTPUT
           else
             echo "No published release found for tag $TAG_NAME, creating one..."
-            RESPONSE=$(curl -sH "Authorization: token $GITHUB_TOKEN" \
+            RESPONSE=$(curl -sH "Authorization: token $GO_MODULES_TOKEN" \
               -X POST "https://api.github.com/repos/$GITHUB_REPOSITORY/releases" \
               -d "{\"tag_name\":\"$TAG_NAME\",\"name\":\"Release $TAG_NAME\",\"body\":\"Release $TAG_NAME\",\"draft\":false}")
             
@@ -55,7 +55,7 @@ jobs:
             echo "upload_url=$UPLOAD_URL" >> $GITHUB_OUTPUT
           fi
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GO_MODULES_TOKEN: ${{ secrets.GO_MODULES_TOKEN }}
       - name: Get Binary Name
         id: binary_name
         run: |
