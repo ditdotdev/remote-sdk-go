@@ -2,6 +2,12 @@ name: Cascade Dependency Updates
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'SDK version to cascade (e.g., v1.3.0)'
+        required: true
+        default: 'v1.3.0'
 
 jobs:
   update-providers:
@@ -34,7 +40,12 @@ jobs:
       
       - name: Update dependency
         run: |
-          VERSION=${GITHUB_REF#refs/tags/}
+          # Get version from release event or manual input
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION="${{ github.event.release.tag_name }}"
+          fi
           echo "Updating ${{ matrix.repo }} to use remote-sdk-go $VERSION"
           
           go get github.com/datadatdat/remote-sdk-go@$VERSION
@@ -45,7 +56,12 @@ jobs:
       
       - name: Create Pull Request
         run: |
-          VERSION=${GITHUB_REF#refs/tags/}
+          # Get version from release event or manual input
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION="${{ github.event.release.tag_name }}"
+          fi
           BRANCH="auto-update-sdk-$VERSION"
           
           git checkout -b $BRANCH
