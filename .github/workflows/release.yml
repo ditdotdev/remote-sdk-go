@@ -92,6 +92,8 @@ jobs:
           go get github.com/datadatdat/remote-sdk-go@$VERSION
           go mod tidy
           go test ./...
+        env:
+          GOPRIVATE: github.com/datadatdat/*
       
       - name: Create Pull Request
         run: |
