@@ -80,20 +80,24 @@ jobs:
       
       - name: Configure Git
         run: |
-          git config user.name "datadatdat-bot"
-          git config user.email "bot@datadatdat.com"
-          git config url."https://x-access-token:${{ secrets.GO_MODULES_TOKEN }}@github.com/".insteadOf "https://github.com/"
+          git config --global user.name "datadatdat-bot"
+          git config --global user.email "bot@datadatdat.com"
+          git config --global url."https://${{ secrets.GO_MODULES_TOKEN }}@github.com/".insteadOf "https://github.com/"
       
       - name: Update dependency
         run: |
           VERSION="${{ needs.release.outputs.version }}"
           echo "Updating ${{ matrix.repo }} to use remote-sdk-go $VERSION"
           
+          # Clear go module cache to avoid stale auth issues
+          go clean -modcache
+          
           go get github.com/datadatdat/remote-sdk-go@$VERSION
           go mod tidy
           go test ./...
         env:
           GOPRIVATE: github.com/datadatdat/*
+          GIT_TERMINAL_PROMPT: 0
       
       - name: Create Pull Request
         run: |
