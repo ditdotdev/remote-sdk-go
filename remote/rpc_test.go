@@ -76,7 +76,7 @@ func TestValidateRemote(t *testing.T) {
 func TestValidateParameters(t *testing.T) {
 	e := getEcho(t)
 	if assert.NotNil(t, e) {
-		err := e.ValidateRemote(map[string]interface{}{})
+		err := e.ValidateParameters(map[string]interface{}{})
 		assert.NoError(t, err)
 	}
 }

@@ -9,3 +9,6 @@
 
 # Build files
 /build
+
+# Test coverage files
+coverage.out
