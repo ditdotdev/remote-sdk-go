@@ -16,7 +16,7 @@ type MockRemote struct {
 
 func (r *MockRemote) Type() (string, error) {
 	args := r.Called()
-	return args.String(0), nil
+	return args.String(0), args.Error(1)
 }
 
 func (r *MockRemote) FromURL(url string, additionalProperties map[string]string) (map[string]interface{}, error) {
