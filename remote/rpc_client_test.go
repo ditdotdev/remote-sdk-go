@@ -17,22 +17,22 @@ import (
 
 // mockProtoClient implements proto.RemoteClient for testing error paths
 type mockProtoClient struct {
-	typeResp       *proto.GetTypeResponse
-	typeErr        error
-	fromURLResp    *proto.FromURLResponse
-	fromURLErr     error
-	toURLResp      *proto.ToURLResponse
-	toURLErr       error
-	getParamsResp  *proto.GetParametersResponse
-	getParamsErr   error
-	valRemoteResp  *proto.ValidateRemoteResponse
-	valRemoteErr   error
-	valParamsResp  *proto.ValidateParametersResponse
-	valParamsErr   error
-	listResp       *proto.ListCommitResponse
-	listErr        error
-	getCommitResp  *proto.GetCommitResponse
-	getCommitErr   error
+	typeResp      *proto.GetTypeResponse
+	typeErr       error
+	fromURLResp   *proto.FromURLResponse
+	fromURLErr    error
+	toURLResp     *proto.ToURLResponse
+	toURLErr      error
+	getParamsResp *proto.GetParametersResponse
+	getParamsErr  error
+	valRemoteResp *proto.ValidateRemoteResponse
+	valRemoteErr  error
+	valParamsResp *proto.ValidateParametersResponse
+	valParamsErr  error
+	listResp      *proto.ListCommitResponse
+	listErr       error
+	getCommitResp *proto.GetCommitResponse
+	getCommitErr  error
 }
 
 func (m *mockProtoClient) GetType(_ context.Context, _ *proto.GetTypeRequest, _ ...grpc.CallOption) (*proto.GetTypeResponse, error) {
