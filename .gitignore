@@ -10,5 +10,6 @@
 # Build files
 /build
 
-# Test coverage files
+# Test coverage
 coverage.out
+coverage.html
