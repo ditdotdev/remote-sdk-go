@@ -24,7 +24,7 @@ jobs:
       - name: Get Version
         id: get_version
         run: echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: actions/setup-go@v5
         with:
           go-version: '1.25.1'
@@ -68,7 +68,7 @@ jobs:
           - datadatdat-remote-go
     steps:
       - name: Checkout provider repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: datadatdat/${{ matrix.repo }}
           token: ${{ secrets.GO_MODULES_TOKEN }}
