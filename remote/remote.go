@@ -192,7 +192,7 @@ func Load(remoteType string, pluginPath string) (Remote, error) {
 	client := plugin.NewClient(&plugin.ClientConfig{
 		HandshakeConfig:  handshakeConfig,
 		Plugins:          pluginMap,
-		Cmd:              exec.Command(fmt.Sprintf("%s/%s", pluginPath, remoteType)), //nolint:gosec // pluginPath and remoteType are controlled inputs
+		Cmd:              exec.Command(fmt.Sprintf("%s/%s", pluginPath, remoteType)), // #nosec G204 -- pluginPath and remoteType are controlled inputs
 		Logger:           logger,
 		AllowedProtocols: []plugin.Protocol{plugin.ProtocolGRPC},
 	})
