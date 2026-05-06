@@ -7,13 +7,24 @@ package echo
 
 import "github.com/datadatdat/remote-sdk-go/remote"
 
+const (
+	// echoType is the remote-type identifier for this sample remote,
+	// used by Type() and as the magic commit-id that GetCommit echoes.
+	echoType = "echo"
+	// tagKeyName is the property key under which a fixture commit's
+	// "name" tag lives; appears in every commit returned by this stub.
+	tagKeyName = "name"
+	// commitTimestampKey is the property key for a commit's timestamp.
+	commitTimestampKey = "timestamp"
+)
+
 // Remote is a sample remote implementation that echoes back test data for development and testing.
 type Remote struct {
 }
 
 // Type returns the remote type identifier for the echo remote.
 func (m Remote) Type() (string, error) {
-	return "echo", nil
+	return echoType, nil
 }
 
 // FromURL parses a URL and additional properties to create remote properties for the echo remote.
@@ -55,12 +66,13 @@ func (m Remote) ValidateParameters(_ map[string]interface{}) error {
 
 // ListCommits returns a list of available commits, optionally filtered by tags.
 func (m Remote) ListCommits(_ map[string]interface{}, _ map[string]interface{}, tags []remote.Tag) ([]remote.Commit, error) {
+	const commitOne = "one"
 	res := []remote.Commit{{
-		ID:         "one",
-		Properties: map[string]interface{}{"tags": map[string]interface{}{"name": "one"}, "timestamp": "2019-09-20T13:45:36Z"},
+		ID:         commitOne,
+		Properties: map[string]interface{}{"tags": map[string]interface{}{tagKeyName: commitOne}, commitTimestampKey: "2019-09-20T13:45:36Z"},
 	}, {
 		ID:         "two",
-		Properties: map[string]interface{}{"tags": map[string]interface{}{"name": "two"}, "timestamp": "2019-09-20T13:45:37Z"},
+		Properties: map[string]interface{}{"tags": map[string]interface{}{tagKeyName: "two"}, commitTimestampKey: "2019-09-20T13:45:37Z"},
 	}}
 	n := 0
 
@@ -79,10 +91,10 @@ func (m Remote) ListCommits(_ map[string]interface{}, _ map[string]interface{}, 
 
 // GetCommit retrieves a specific commit by its identifier.
 func (m Remote) GetCommit(_ map[string]interface{}, _ map[string]interface{}, commitID string) (*remote.Commit, error) {
-	if commitID == "echo" {
+	if commitID == echoType {
 		return &remote.Commit{
-			ID:         "echo",
-			Properties: map[string]interface{}{"name": "echo", "timestamp": "2019-09-20T13:45:36Z"},
+			ID:         echoType,
+			Properties: map[string]interface{}{tagKeyName: echoType, commitTimestampKey: "2019-09-20T13:45:36Z"},
 		}, nil
 	}
 
