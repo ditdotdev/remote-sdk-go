@@ -149,10 +149,15 @@ var handshakeConfig = plugin.HandshakeConfig{
 	MagicCookieValue: "dba4fe2b-56ff-4a16-9bfc-bf651b8f12d6",
 }
 
+// pluginName is the hclog logger name and the plugin-map key used by
+// both Serve and Load when wiring up the go-plugin RPC channel; both
+// sides have to agree on it for Dispense to find the implementation.
+const pluginName = "remote"
+
 // Serve runs the remote as a plugin server, to be invoked from the main method of the remote implementation.
 func Serve(remoteType string) {
 	logger := hclog.New(&hclog.LoggerOptions{
-		Name:   "remote",
+		Name:   pluginName,
 		Output: os.Stdout,
 		Level:  hclog.Error,
 	})
@@ -160,7 +165,7 @@ func Serve(remoteType string) {
 	remote := Get(remoteType)
 
 	var pluginMap = map[string]plugin.Plugin{
-		"remote": &remotePlugin{Impl: remote},
+		pluginName: &remotePlugin{Impl: remote},
 	}
 
 	plugin.Serve(&plugin.ServeConfig{
@@ -178,7 +183,7 @@ func Load(remoteType string, pluginPath string) (Remote, error) {
 	}
 
 	logger := hclog.New(&hclog.LoggerOptions{
-		Name:   "remote",
+		Name:   pluginName,
 		Output: os.Stdout,
 		Level:  hclog.Error,
 	})
@@ -186,7 +191,7 @@ func Load(remoteType string, pluginPath string) (Remote, error) {
 	remote := Get(remoteType)
 
 	var pluginMap = map[string]plugin.Plugin{
-		"remote": &remotePlugin{Impl: remote},
+		pluginName: &remotePlugin{Impl: remote},
 	}
 
 	client := plugin.NewClient(&plugin.ClientConfig{
@@ -203,7 +208,7 @@ func Load(remoteType string, pluginPath string) (Remote, error) {
 		return nil, err
 	}
 
-	raw, err := rpcClient.Dispense("remote")
+	raw, err := rpcClient.Dispense(pluginName)
 	if err != nil {
 		client.Kill()
 		return nil, err
