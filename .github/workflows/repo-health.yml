@@ -16,11 +16,16 @@ jobs:
       coverage-floor: 70
       max-cyclomatic: 25
       mode: warn
-      # The remote/ tests load a plugin binary at ../build/echo (relative to
-      # the package). Build it before running tests so coverage measurement
-      # reflects actual test passes, not crashes from a missing fixture.
+      # The remote/ tests load a plugin binary at ../build/echo (relative
+      # to the package). Build it with -cover so the binary emits coverage
+      # data when it exits — that data is merged back into the main profile
+      # by the reusable workflow, giving real coverage signal for the
+      # plugin Serve() loop and cmd/echo/main.go (which would otherwise
+      # show as 0% because in-process coverage doesn't span subprocess
+      # boundaries).
       pre-test: |
-        mkdir -p build
-        go build -o build/echo ./cmd/echo
+        mkdir -p build cov-data
+        go build -cover -covermode=atomic -o build/echo ./cmd/echo
+        echo "GOCOVERDIR=$PWD/cov-data" >> $GITHUB_ENV
     secrets:
       GO_MODULES_TOKEN: ${{ secrets.GO_MODULES_TOKEN }}
