@@ -16,5 +16,11 @@ jobs:
       coverage-floor: 70
       max-cyclomatic: 25
       mode: warn
+      # The remote/ tests load a plugin binary at ../build/echo (relative to
+      # the package). Build it before running tests so coverage measurement
+      # reflects actual test passes, not crashes from a missing fixture.
+      pre-test: |
+        mkdir -p build
+        go build -o build/echo ./cmd/echo
     secrets:
       GO_MODULES_TOKEN: ${{ secrets.GO_MODULES_TOKEN }}
