@@ -251,6 +251,21 @@ func TestStruct2ProtobufStruct(t *testing.T) {
 	}
 }
 
+// === Defensive fallthrough at elabValue (util.go:63) ===
+
+// TestStruct2Map_UnknownValueKind covers the fallthrough branch in elabValue
+// for a *pb.Value with no Kind set. Before the bug fix at util.go:63 this
+// test FAILED because the function returned the error in the value position
+// (with a nil error), so Struct2Map silently produced a map containing the
+// error and no error itself. After the fix it correctly returns (nil, error).
+func TestStruct2Map_UnknownValueKind(t *testing.T) {
+	s := &pb.Struct{Fields: map[string]*pb.Value{
+		"x": {}, // nil Kind: doesn't match any of the type assertions
+	}}
+	_, err := Struct2Map(s)
+	assert.Error(t, err)
+}
+
 // === Round-trip ===
 
 func TestRoundTrip(t *testing.T) {

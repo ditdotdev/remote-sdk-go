@@ -60,7 +60,7 @@ func elabValue(value *protobuf_struct.Value) (interface{}, error) {
 		return boolValue.BoolValue, nil
 	}
 
-	return fmt.Errorf("cannot convert the value %+v", value), nil
+	return nil, fmt.Errorf("cannot convert the value %+v", value)
 }
 
 // Struct2Map converts a protobuf Struct to a Go map[string]interface{}.
