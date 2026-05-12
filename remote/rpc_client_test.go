@@ -205,6 +205,56 @@ func TestClientGetCommitParamsConversionError(t *testing.T) {
 	assert.Error(t, err)
 }
 
+// badStruct returns a *structpb.Struct whose Fields contain a Value with no
+// Kind set. Struct2Map errors on this input (after the util.go:63 fix);
+// before the fix, the error was silently returned in the value position.
+// Used to exercise the response-side Struct2Map error returns in rpc_client.
+func badStruct() *structpb.Struct {
+	return &structpb.Struct{Fields: map[string]*structpb.Value{
+		"x": {}, // nil Kind triggers the elabValue fallthrough
+	}}
+}
+
+// === Response-side Struct2Map error paths in rpc_client (now reachable) ===
+
+func TestClientFromURLResponseConversionError(t *testing.T) {
+	client := remoteRPCClient{Client: &mockProtoClient{
+		fromURLResp: &proto.FromURLResponse{Remote: badStruct()},
+	}}
+	_, err := client.FromURL("test://url", nil)
+	assert.Error(t, err)
+}
+
+func TestClientGetParametersResponseConversionError(t *testing.T) {
+	client := remoteRPCClient{Client: &mockProtoClient{
+		getParamsResp: &proto.GetParametersResponse{Parameters: badStruct()},
+	}}
+	_, err := client.GetParameters(map[string]interface{}{"a": "b"})
+	assert.Error(t, err)
+}
+
+func TestClientListCommitsResponseConversionError(t *testing.T) {
+	client := remoteRPCClient{Client: &mockProtoClient{
+		listResp: &proto.ListCommitResponse{
+			Commits: []*proto.Commit{{Id: "c1", Properties: badStruct()}},
+		},
+	}}
+	_, err := client.ListCommits(map[string]interface{}{}, map[string]interface{}{}, []Tag{})
+	assert.Error(t, err)
+}
+
+func TestClientGetCommitResponseConversionError(t *testing.T) {
+	client := remoteRPCClient{Client: &mockProtoClient{
+		getCommitResp: &proto.GetCommitResponse{
+			Commit: &proto.GetCommitResponse_CommitValue{
+				CommitValue: &proto.Commit{Id: "abc", Properties: badStruct()},
+			},
+		},
+	}}
+	_, err := client.GetCommit(map[string]interface{}{}, map[string]interface{}{}, "abc")
+	assert.Error(t, err)
+}
+
 // Test server-side conversion errors by passing unconvertible types from Impl
 func TestServerFromURLConversionError(t *testing.T) {
 	r := new(MockRemote)

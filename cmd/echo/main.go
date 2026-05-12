@@ -6,9 +6,6 @@ import (
 	"github.com/datadatdat/remote-sdk-go/remote"
 )
 
-type MockRemote struct {
-}
-
 func main() {
 	remote.Register(echo.Remote{})
 	remote.Serve("echo")
