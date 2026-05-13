@@ -320,3 +320,78 @@ func TestServerGetCommitError(t *testing.T) {
 	assert.Nil(t, resp)
 	r.AssertExpectations(t)
 }
+
+// === Request-side Struct2Map error paths in rpc_server (now reachable) ===
+//
+// These exercise the conversion.Struct2Map(req.Remote/Parameters) error
+// returns in each handler. Before the util.go:63 fix the conversion
+// silently returned the error in the value position, so these branches
+// were unreachable; after the fix they are correctly reported as errors.
+
+func TestServerToURLConversionError(t *testing.T) {
+	server := &remoteRPCServer{Impl: new(MockRemote)}
+	resp, err := server.ToURL(context.Background(), &proto.ToURLRequest{Remote: badStruct()})
+	assert.Error(t, err)
+	assert.Nil(t, resp)
+}
+
+func TestServerGetParametersRequestConversionError(t *testing.T) {
+	server := &remoteRPCServer{Impl: new(MockRemote)}
+	resp, err := server.GetParameters(context.Background(), &proto.GetParametersRequest{Remote: badStruct()})
+	assert.Error(t, err)
+	assert.Nil(t, resp)
+}
+
+func TestServerValidateRemoteConversionError(t *testing.T) {
+	server := &remoteRPCServer{Impl: new(MockRemote)}
+	resp, err := server.ValidateRemote(context.Background(), &proto.ValidateRemoteRequest{Remote: badStruct()})
+	assert.Error(t, err)
+	assert.Nil(t, resp)
+}
+
+func TestServerValidateParametersConversionError(t *testing.T) {
+	server := &remoteRPCServer{Impl: new(MockRemote)}
+	resp, err := server.ValidateParameters(context.Background(), &proto.ValidateParametersRequest{Parameters: badStruct()})
+	assert.Error(t, err)
+	assert.Nil(t, resp)
+}
+
+func TestServerListCommitsRemoteConversionError(t *testing.T) {
+	server := &remoteRPCServer{Impl: new(MockRemote)}
+	good, _ := structpb.NewStruct(map[string]interface{}{})
+	resp, err := server.ListCommits(context.Background(), &proto.ListCommitRequest{
+		Remote: badStruct(), Parameters: good,
+	})
+	assert.Error(t, err)
+	assert.Nil(t, resp)
+}
+
+func TestServerListCommitsParametersConversionError(t *testing.T) {
+	server := &remoteRPCServer{Impl: new(MockRemote)}
+	good, _ := structpb.NewStruct(map[string]interface{}{})
+	resp, err := server.ListCommits(context.Background(), &proto.ListCommitRequest{
+		Remote: good, Parameters: badStruct(),
+	})
+	assert.Error(t, err)
+	assert.Nil(t, resp)
+}
+
+func TestServerGetCommitRemoteConversionError(t *testing.T) {
+	server := &remoteRPCServer{Impl: new(MockRemote)}
+	good, _ := structpb.NewStruct(map[string]interface{}{})
+	resp, err := server.GetCommit(context.Background(), &proto.GetCommitRequest{
+		Remote: badStruct(), Parameters: good, CommitId: "x",
+	})
+	assert.Error(t, err)
+	assert.Nil(t, resp)
+}
+
+func TestServerGetCommitParametersConversionError(t *testing.T) {
+	server := &remoteRPCServer{Impl: new(MockRemote)}
+	good, _ := structpb.NewStruct(map[string]interface{}{})
+	resp, err := server.GetCommit(context.Background(), &proto.GetCommitRequest{
+		Remote: good, Parameters: badStruct(), CommitId: "x",
+	})
+	assert.Error(t, err)
+	assert.Nil(t, resp)
+}
