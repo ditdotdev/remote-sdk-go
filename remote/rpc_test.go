@@ -9,7 +9,7 @@ import (
 )
 
 func getEcho(t *testing.T) Remote {
-	Clear()
+	ClearForTesting()
 
 	r, err := Load("echo", "../build")
 	if assert.NoError(t, err) {

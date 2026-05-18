@@ -131,65 +131,65 @@ func TestMatchTags(t *testing.T) {
 }
 
 func TestParseURLNoProviders(t *testing.T) {
-	Clear()
-	_, _, _, _, err := ParseURL("s3://bucket/path", nil)
+	ClearForTesting()
+	_, err := ParseURL("s3://bucket/path", nil)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "no remote provider found")
 }
 
 func TestParseURLInvalidQueryParam(t *testing.T) {
-	Clear()
-	_, _, _, _, err := ParseURL("s3://bucket/path?invalid=value", nil)
+	ClearForTesting()
+	_, err := ParseURL("s3://bucket/path?invalid=value", nil)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "invalid query parameter")
 }
 
 func TestParseURLInvalidURL(t *testing.T) {
-	Clear()
-	_, _, _, _, err := ParseURL("://invalid", nil)
+	ClearForTesting()
+	_, err := ParseURL("://invalid", nil)
 	assert.Error(t, err)
 }
 
 func TestParseURLWithTagsAndFragment(t *testing.T) {
-	Clear()
+	ClearForTesting()
 
 	r := new(MockRemote)
 	r.On("Type").Return("mock", nil)
 	r.On("FromURL", "mock://bucket/path", map[string]string(nil)).Return(map[string]interface{}{"bucket": "bucket"}, nil)
 	Register(r)
 
-	provider, props, tags, commit, err := ParseURL("mock://bucket/path?tag=v1&tag=v2#commit-abc", nil)
+	result, err := ParseURL("mock://bucket/path?tag=v1&tag=v2#commit-abc", nil)
 	assert.NoError(t, err)
-	assert.Equal(t, "mock", provider)
-	assert.Equal(t, map[string]interface{}{"bucket": "bucket"}, props)
-	assert.Equal(t, []string{"v1", "v2"}, tags)
-	assert.Equal(t, "commit-abc", commit)
+	assert.Equal(t, "mock", result.Provider)
+	assert.Equal(t, map[string]interface{}{"bucket": "bucket"}, result.Properties)
+	assert.Equal(t, []string{"v1", "v2"}, result.Tags)
+	assert.Equal(t, "commit-abc", result.Commit)
 }
 
 func TestParseURLNoFragment(t *testing.T) {
-	Clear()
+	ClearForTesting()
 
 	r := new(MockRemote)
 	r.On("Type").Return("mock", nil)
 	r.On("FromURL", "mock://bucket/path", map[string]string(nil)).Return(map[string]interface{}{"bucket": "bucket"}, nil)
 	Register(r)
 
-	provider, _, tags, commit, err := ParseURL("mock://bucket/path", nil)
+	result, err := ParseURL("mock://bucket/path", nil)
 	assert.NoError(t, err)
-	assert.Equal(t, "mock", provider)
-	assert.Empty(t, tags)
-	assert.Equal(t, "", commit)
+	assert.Equal(t, "mock", result.Provider)
+	assert.Empty(t, result.Tags)
+	assert.Equal(t, "", result.Commit)
 }
 
 func TestParseURLSchemeOnly(t *testing.T) {
-	Clear()
-	_, _, _, _, err := ParseURL("justpath", nil)
+	ClearForTesting()
+	_, err := ParseURL("justpath", nil)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "no remote provider found")
 }
 
 func TestParseURLProviderTypeError(t *testing.T) {
-	Clear()
+	ClearForTesting()
 
 	r := new(MockRemote)
 	r.On("Type").Return("mock", nil).Once()
@@ -198,13 +198,13 @@ func TestParseURLProviderTypeError(t *testing.T) {
 
 	// After registration, make Type() return an error for the ParseURL call
 	r.On("Type").Return("", assert.AnError).Maybe()
-	_, _, _, _, err := ParseURL("mock://bucket", nil)
+	_, err := ParseURL("mock://bucket", nil)
 	// Should fall through to "no remote provider found" since Type() errors
 	assert.Error(t, err)
 }
 
 func TestRegisterPanicsOnTypeError(t *testing.T) {
-	Clear()
+	ClearForTesting()
 
 	r := new(MockRemote)
 	r.On("Type").Return("", assert.AnError)
