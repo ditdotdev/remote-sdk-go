@@ -7,12 +7,14 @@ package remote
 
 import (
 	"context"
-	"fmt"
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
 	"google.golang.org/grpc"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"runtime"
+	"strings"
 
 	remote "github.com/datadatdat/remote-sdk-go/internal/proto"
 )
@@ -118,6 +120,10 @@ var loadedRemotes = map[string]loadedRemote{}
 
 // Register a new remote. This should be called from the init() function of a remote implementation. The remotes can
 // later be accessed via the Get() method.
+//
+// Panics if remote.Type() returns an error. This is intentional: Register is an init-time call, and a remote that
+// cannot report its own type is a programmer error that should fail loudly at process start rather than be surfaced
+// later as a missing-registration at request time.
 func Register(remote Remote) {
 	remoteType, err := remote.Type()
 	if err != nil {
@@ -155,6 +161,10 @@ var handshakeConfig = plugin.HandshakeConfig{
 const pluginName = "remote"
 
 // Serve runs the remote as a plugin server, to be invoked from the main method of the remote implementation.
+//
+// Serve has no error return and does not return under normal operation: plugin.Serve blocks until the parent
+// process closes stdin (per the go-plugin contract) and then exits the process. There is intentionally nothing
+// for a caller to do with control flow after Serve returns.
 func Serve(remoteType string) {
 	logger := hclog.New(&hclog.LoggerOptions{
 		Name:   pluginName,
@@ -174,6 +184,20 @@ func Serve(remoteType string) {
 		GRPCServer:      plugin.DefaultGRPCServer,
 		Logger:          logger,
 	})
+}
+
+const windowsGOOS = "windows"
+
+// pluginBinaryPath joins pluginPath and remoteType into the path of the plugin executable, adding the OS-appropriate
+// executable suffix. On Windows, Go's toolchain emits binaries with a .exe suffix, and exec.Command does not auto-
+// append .exe when the path contains a separator — so the SDK has to add it explicitly or Load() can never spawn its
+// plugin subprocess.
+func pluginBinaryPath(pluginPath string, remoteType string) string {
+	binName := remoteType
+	if runtime.GOOS == windowsGOOS && !strings.HasSuffix(strings.ToLower(binName), ".exe") {
+		binName += ".exe"
+	}
+	return filepath.Join(pluginPath, binName)
 }
 
 // Load a remote via the plugin interface. These plugins will remain loaded until Unload() or Clear() is called.
@@ -197,7 +221,7 @@ func Load(remoteType string, pluginPath string) (Remote, error) {
 	client := plugin.NewClient(&plugin.ClientConfig{
 		HandshakeConfig:  handshakeConfig,
 		Plugins:          pluginMap,
-		Cmd:              exec.Command(fmt.Sprintf("%s/%s", pluginPath, remoteType)), // #nosec G204 -- pluginPath and remoteType are controlled inputs
+		Cmd:              exec.Command(pluginBinaryPath(pluginPath, remoteType)), // #nosec G204 -- pluginPath and remoteType are controlled inputs
 		Logger:           logger,
 		AllowedProtocols: []plugin.Protocol{plugin.ProtocolGRPC},
 	})
