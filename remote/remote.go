@@ -110,11 +110,6 @@ func (remotePlugin) GRPCClient(_ context.Context, _ *plugin.GRPCBroker, c *grpc.
 	return &remoteRPCClient{Client: remote.NewRemoteClient(c)}, nil
 }
 
-type loadedRemote struct {
-	r Remote
-	c *plugin.Client
-}
-
 // Register adds a Remote to the Default registry. See Registry.Register for details.
 func Register(rem Remote) { Default.Register(rem) }
 
