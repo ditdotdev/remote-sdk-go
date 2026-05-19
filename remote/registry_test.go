@@ -17,7 +17,7 @@ type mockRemote struct {
 	typ string
 }
 
-func (m *mockRemote) Type() (string, error)                    { return m.typ, nil }
+func (m *mockRemote) Type() (string, error) { return m.typ, nil }
 func (m *mockRemote) FromURL(string, map[string]string) (map[string]interface{}, error) {
 	panic("not implemented")
 }
