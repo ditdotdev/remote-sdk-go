@@ -16,7 +16,5 @@ jobs:
       - uses: actions/setup-go@v6
         with:
           go-version: '1.26.2'
-      - name: Build echo
-        run: go build -o build/echo ./cmd/echo
       - name: Test
         run: go test -v ./...

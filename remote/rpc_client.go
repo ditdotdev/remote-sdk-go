@@ -7,8 +7,9 @@ package remote
 
 import (
 	"context"
+
+	"github.com/datadatdat/remote-sdk-go/internal/conversion"
 	proto "github.com/datadatdat/remote-sdk-go/internal/proto"
-	conversion "github.com/datadatdat/remote-sdk-go/internal/util"
 )
 
 type remoteRPCClient struct {

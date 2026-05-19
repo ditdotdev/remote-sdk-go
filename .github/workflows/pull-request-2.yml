@@ -170,20 +170,6 @@ jobs:
       - name: Build
         run: go build -v ./...
 
-      - name: Build echo binary for tests (Unix)
-        if: runner.os != 'Windows'
-        run: |
-          mkdir -p build
-          go build -o build/echo ./cmd/echo
-
-      - name: Build echo binary for tests (Windows)
-        if: runner.os == 'Windows'
-        run: |
-          mkdir -p build
-          go build -o build/echo.exe ./cmd/echo
-          # On Windows, the .exe extension is automatically added by the OS when needed
-        shell: bash
-
       - name: Run tests
         run: |
           if [ "${{ runner.os }}" != "Windows" ]; then
