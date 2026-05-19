@@ -10,12 +10,31 @@ import (
 	"net/url"
 )
 
-// ParseURL wraps remote URL parsing in an easier-to use function that will handle converting to the intermediate URL format,
-// processing any query parameters (for tags) and fragment (for commit IDs).
-func ParseURL(input string, properties map[string]string) (string, map[string]interface{}, []string, string, error) {
+// ParseResult is the structured output of ParseURL: the provider that claimed the URL, the parsed
+// provider-specific properties, any `?tag=` query parameters, and the URL fragment (interpreted as a commit ID).
+//
+// Replaces the previous 5-value return signature of ParseURL, which was unreadable at call sites.
+type ParseResult struct {
+	Provider   string
+	Properties map[string]interface{}
+	Tags       []string
+	Commit     string
+}
+
+// ParseURL parses a remote URL using the Default registry. See Registry.ParseURL for details.
+func ParseURL(input string, properties map[string]string) (*ParseResult, error) {
+	return Default.ParseURL(input, properties)
+}
+
+// ParseURL parses a remote URL by handing it to every registered provider in turn and returning the first one
+// that accepts it. Query parameters (`?tag=...`) and the URL fragment (`#commit-id`) are stripped before the
+// provider sees the URL and returned in the ParseResult instead.
+//
+// Returns an error if no registered provider accepts the URL, or if the URL has query parameters other than `tag`.
+func (r *Registry) ParseURL(input string, properties map[string]string) (*ParseResult, error) {
 	u, err := url.Parse(input)
 	if err != nil {
-		return "", nil, nil, "", err
+		return nil, err
 	}
 
 	commit := u.Fragment
@@ -23,7 +42,7 @@ func ParseURL(input string, properties map[string]string) (string, map[string]in
 
 	for k := range u.Query() {
 		if k != "tag" {
-			return "", nil, nil, "", fmt.Errorf("invalid query parameter '%s'", k)
+			return nil, fmt.Errorf("invalid query parameter '%s'", k)
 		}
 	}
 
@@ -35,27 +54,29 @@ func ParseURL(input string, properties map[string]string) (string, map[string]in
 	u.Fragment = ""
 	urlWithoutQueryAndFragment := u.String()
 
-	// Try to find a provider that can handle this URL by attempting to parse it with each registered provider
-	for _, r := range registeredRemotes {
-		props, err := r.FromURL(urlWithoutQueryAndFragment, properties)
-		if err == nil {
-			// This provider successfully parsed the URL
-			provider, err := r.Type()
-			if err != nil {
-				continue
-			}
-			return provider, props, tags, commit, nil
+	// Try to find a provider that can handle this URL by attempting to parse it with each registered provider.
+	// snapshot() returns a slice copy so we don't hold the registry lock across FromURL/Type callbacks.
+	for _, rem := range r.snapshot() {
+		props, err := rem.FromURL(urlWithoutQueryAndFragment, properties)
+		if err != nil {
+			continue
 		}
-		// Continue trying other providers if this one failed
+		provider, err := rem.Type()
+		if err != nil {
+			continue
+		}
+		return &ParseResult{
+			Provider:   provider,
+			Properties: props,
+			Tags:       tags,
+			Commit:     commit,
+		}, nil
 	}
 
-	// If no provider could parse the URL, try the legacy scheme-based lookup for backwards compatibility
-	var scheme string
-	if u.Scheme != "" {
-		scheme = u.Scheme
-	} else {
+	// If no provider could parse the URL, surface the scheme we tried — helps users diagnose typos.
+	scheme := u.Scheme
+	if scheme == "" {
 		scheme = u.Path
 	}
-
-	return "", nil, nil, "", fmt.Errorf("no remote provider found that can handle URI '%s' (tried scheme '%s')", input, scheme)
+	return nil, fmt.Errorf("no remote provider found that can handle URI '%s' (tried scheme '%s')", input, scheme)
 }

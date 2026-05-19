@@ -7,14 +7,14 @@ package remote
 
 import (
 	"context"
-	"github.com/hashicorp/go-hclog"
-	"github.com/hashicorp/go-plugin"
-	"google.golang.org/grpc"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	"github.com/hashicorp/go-hclog"
+	"github.com/hashicorp/go-plugin"
+	"google.golang.org/grpc"
 
 	remote "github.com/datadatdat/remote-sdk-go/internal/proto"
 )
@@ -115,39 +115,20 @@ type loadedRemote struct {
 	c *plugin.Client
 }
 
-var registeredRemotes = map[string]Remote{}
-var loadedRemotes = map[string]loadedRemote{}
+// Register adds a Remote to the Default registry. See Registry.Register for details.
+func Register(rem Remote) { Default.Register(rem) }
 
-// Register a new remote. This should be called from the init() function of a remote implementation. The remotes can
-// later be accessed via the Get() method.
-//
-// Panics if remote.Type() returns an error. This is intentional: Register is an init-time call, and a remote that
-// cannot report its own type is a programmer error that should fail loudly at process start rather than be surfaced
-// later as a missing-registration at request time.
-func Register(remote Remote) {
-	remoteType, err := remote.Type()
-	if err != nil {
-		panic(err)
-	}
+// Get returns the registered Remote for the given type from the Default registry. The bool is false if no Remote
+// has been registered for that type. See Registry.Get for details.
+func Get(remoteType string) (Remote, bool) { return Default.Get(remoteType) }
 
-	registeredRemotes[remoteType] = remote
-}
+// Loaded reports whether the given remote type currently has a live plugin subprocess cached in the Default
+// registry. See Registry.Loaded for details.
+func Loaded(remoteType string) bool { return Default.Loaded(remoteType) }
 
-// Get a remote by type.
-func Get(remoteType string) Remote {
-	return registeredRemotes[remoteType]
-}
-
-// Clear any registered or loaded remotes. Should only be used for testing.
-func Clear() {
-	registeredRemotes = map[string]Remote{}
-
-	for _, v := range loadedRemotes {
-		v.c.Kill()
-	}
-
-	loadedRemotes = map[string]loadedRemote{}
-}
+// ClearForTesting removes every registration and terminates every loaded plugin subprocess in the Default
+// registry. Intended for test isolation — production code should not need to call it.
+func ClearForTesting() { Default.Clear() }
 
 var handshakeConfig = plugin.HandshakeConfig{
 	ProtocolVersion:  1,
@@ -172,7 +153,7 @@ func Serve(remoteType string) {
 		Level:  hclog.Error,
 	})
 
-	remote := Get(remoteType)
+	remote, _ := Get(remoteType)
 
 	var pluginMap = map[string]plugin.Plugin{
 		pluginName: &remotePlugin{Impl: remote},
@@ -200,56 +181,12 @@ func pluginBinaryPath(pluginPath string, remoteType string) string {
 	return filepath.Join(pluginPath, binName)
 }
 
-// Load a remote via the plugin interface. These plugins will remain loaded until Unload() or Clear() is called.
+// Load starts (or returns the cached handle for) the plugin subprocess for the given remote type in the Default
+// registry. See Registry.Load for details.
 func Load(remoteType string, pluginPath string) (Remote, error) {
-	if v, ok := loadedRemotes[remoteType]; ok {
-		return v.r, nil
-	}
-
-	logger := hclog.New(&hclog.LoggerOptions{
-		Name:   pluginName,
-		Output: os.Stdout,
-		Level:  hclog.Error,
-	})
-
-	remote := Get(remoteType)
-
-	var pluginMap = map[string]plugin.Plugin{
-		pluginName: &remotePlugin{Impl: remote},
-	}
-
-	client := plugin.NewClient(&plugin.ClientConfig{
-		HandshakeConfig:  handshakeConfig,
-		Plugins:          pluginMap,
-		Cmd:              exec.Command(pluginBinaryPath(pluginPath, remoteType)), // #nosec G204 -- pluginPath and remoteType are controlled inputs
-		Logger:           logger,
-		AllowedProtocols: []plugin.Protocol{plugin.ProtocolGRPC},
-	})
-
-	rpcClient, err := client.Client()
-	if err != nil {
-		client.Kill()
-		return nil, err
-	}
-
-	raw, err := rpcClient.Dispense(pluginName)
-	if err != nil {
-		client.Kill()
-		return nil, err
-	}
-
-	loadedRemotes[remoteType] = loadedRemote{
-		r: raw.(Remote),
-		c: client,
-	}
-
-	return raw.(Remote), nil
+	return Default.Load(remoteType, pluginPath)
 }
 
-// Unload terminates and removes a loaded remote plugin from memory.
-func Unload(remoteType string) {
-	if val, ok := loadedRemotes[remoteType]; ok {
-		val.c.Kill()
-		delete(loadedRemotes, remoteType)
-	}
-}
+// Unload terminates and removes the plugin subprocess for the given remote type from the Default registry. See
+// Registry.Unload for details.
+func Unload(remoteType string) { Default.Unload(remoteType) }
