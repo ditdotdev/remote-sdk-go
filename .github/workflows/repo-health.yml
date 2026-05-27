@@ -8,9 +8,7 @@ on:
 
 jobs:
   health:
-    # NOTE: pinned to chore/repo-health-workflow for the rollout PR.
-    # Will be updated to @master once datadatdat/.github PR #4 merges.
-    uses: datadatdat/.github/.github/workflows/repo-health.yml@chore/repo-health-workflow
+    uses: datadatdat/.github/.github/workflows/repo-health.yml@master
     with:
       language: go
       coverage-floor: 70
