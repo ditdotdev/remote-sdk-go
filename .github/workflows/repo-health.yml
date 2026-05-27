@@ -11,9 +11,9 @@ jobs:
     uses: datadatdat/.github/.github/workflows/repo-health.yml@master
     with:
       language: go
-      coverage-floor: 70
+      coverage-floor: 90
       max-cyclomatic: 25
-      mode: warn
+      mode: block
       # The remote/ tests load a plugin binary at ../build/echo (relative
       # to the package). Build it with -cover so the binary emits coverage
       # data when it exits — that data is merged back into the main profile
