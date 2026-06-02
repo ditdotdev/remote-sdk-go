@@ -1,5 +1,5 @@
 #
-# Copyright Datadatdat.
+# Copyright Dit.
 #
 
 #
@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   health:
-    uses: datadatdat/.github/.github/workflows/repo-health.yml@master
+    uses: ditdotdev/.github/.github/workflows/repo-health.yml@master
     with:
       language: go
       coverage-floor: 90
@@ -51,11 +51,11 @@ jobs:
       - name: Build
         run: go build -o build/echo ./cmd/echo
         env:
-          GOPRIVATE: github.com/datadatdat/*
+          GOPRIVATE: github.com/ditdotdev/*
       - name: Test
         run: go test ./...
         env:
-          GOPRIVATE: github.com/datadatdat/*
+          GOPRIVATE: github.com/ditdotdev/*
       - name: Create Release
         run: |
           TAG_NAME=${GITHUB_REF#refs/tags/}
@@ -76,12 +76,12 @@ jobs:
           - ssh-remote-go
           - s3web-remote-go
           - nop-remote-go
-          - datadatdat-remote-go
+          - dit-remote-go
     steps:
       - name: Checkout provider repo
         uses: actions/checkout@v6
         with:
-          repository: datadatdat/${{ matrix.repo }}
+          repository: ditdotdev/${{ matrix.repo }}
           token: ${{ secrets.GO_MODULES_TOKEN }}
       
       - name: Setup Go
@@ -91,8 +91,8 @@ jobs:
       
       - name: Configure Git
         run: |
-          git config --global user.name "datadatdat-bot"
-          git config --global user.email "bot@datadatdat.com"
+          git config --global user.name "dit-bot"
+          git config --global user.email "bot@dit.dev"
           git config --global url."https://${{ secrets.GO_MODULES_TOKEN }}@github.com/".insteadOf "https://github.com/"
       
       - name: Update dependency
@@ -103,11 +103,11 @@ jobs:
           # Clear go module cache to avoid stale auth issues
           go clean -modcache
           
-          go get github.com/datadatdat/remote-sdk-go@$VERSION
+          go get github.com/ditdotdev/remote-sdk-go@$VERSION
           go mod tidy
           go test ./...
         env:
-          GOPRIVATE: github.com/datadatdat/*
+          GOPRIVATE: github.com/ditdotdev/*
           GIT_TERMINAL_PROMPT: 0
       
       - name: Create Pull Request

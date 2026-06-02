@@ -1,11 +1,11 @@
 /*
- * Copyright Datadatdat.
+ * Copyright Dit.
  */
 
 // Package echo provides a sample echo remote implementation for testing and demonstration purposes.
 package echo
 
-import "github.com/datadatdat/remote-sdk-go/remote"
+import "github.com/ditdotdev/remote-sdk-go/remote"
 
 const (
 	// echoType is the remote-type identifier for this sample remote,

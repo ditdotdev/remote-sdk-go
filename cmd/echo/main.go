@@ -2,8 +2,8 @@
 package main
 
 import (
-	"github.com/datadatdat/remote-sdk-go/internal/echo"
-	"github.com/datadatdat/remote-sdk-go/remote"
+	"github.com/ditdotdev/remote-sdk-go/internal/echo"
+	"github.com/ditdotdev/remote-sdk-go/remote"
 )
 
 func main() {

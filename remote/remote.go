@@ -1,8 +1,8 @@
 /*
- * Copyright Datadatdat.
+ * Copyright Dit.
  */
 
-// Package remote provides the core remote plugin infrastructure for Datadatdat.
+// Package remote provides the core remote plugin infrastructure for Dit.
 package remote
 
 import (
@@ -16,11 +16,11 @@ import (
 	"github.com/hashicorp/go-plugin"
 	"google.golang.org/grpc"
 
-	remote "github.com/datadatdat/remote-sdk-go/internal/proto"
+	remote "github.com/ditdotdev/remote-sdk-go/internal/proto"
 )
 
 /*
- * SDK for Datadatdat remotes.
+ * SDK for Dit remotes.
  */
 
 // Tag represents a filter criteria for listing commits, with a key-value pair for matching.
@@ -127,7 +127,7 @@ func ClearForTesting() { Default.Clear() }
 
 var handshakeConfig = plugin.HandshakeConfig{
 	ProtocolVersion:  1,
-	MagicCookieKey:   "Datadatdat",
+	MagicCookieKey:   "Dit",
 	MagicCookieValue: "dba4fe2b-56ff-4a16-9bfc-bf651b8f12d6",
 }
 
