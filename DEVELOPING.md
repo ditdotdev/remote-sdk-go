@@ -1,12 +1,12 @@
 # Project Development
 
 For general information about contributing changes, see the
-[Contributor Guidelines](https://github.com/datadatdat/.github/blob/master/CONTRIBUTING.md).
+[Contributor Guidelines](https://github.com/ditdotdev/.github/blob/master/CONTRIBUTING.md).
 
 ## How it Works
 
 The Remote SDK currently provides interfaces only for use by the client. This includes the ability to register
-remote providers, and parse URIs. Future work will add server-side capabilities for use in Datadatdat-server, enabling
+remote providers, and parse URIs. Future work will add server-side capabilities for use in Dit-server, enabling
 the EOL of the legacy kotlin remote providers.
 
 Remotes can be directly imported into go programs, or loaded dynamically using

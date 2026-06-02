@@ -22,8 +22,8 @@ linters:
     rules:
       # Test files routinely repeat fixture strings ("env", "bucket",
       # timestamps etc.) for self-contained readability. Skip goconst
-      # there. Mirrors the same exclusion in datadatdat-server and
-      # datadatdat-remote-server.
+      # there. Mirrors the same exclusion in dit-server and
+      # dit-remote-server.
       - path: _test\.go
         linters:
           - goconst

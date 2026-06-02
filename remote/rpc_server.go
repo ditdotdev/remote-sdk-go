@@ -1,15 +1,15 @@
 /*
- * Copyright Datadatdat.
+ * Copyright Dit.
  */
 
-// Package remote provides the core remote plugin infrastructure for Datadatdat.
+// Package remote provides the core remote plugin infrastructure for Dit.
 package remote
 
 import (
 	"context"
 
-	"github.com/datadatdat/remote-sdk-go/internal/conversion"
-	proto "github.com/datadatdat/remote-sdk-go/internal/proto"
+	"github.com/ditdotdev/remote-sdk-go/internal/conversion"
+	proto "github.com/ditdotdev/remote-sdk-go/internal/proto"
 )
 
 type remoteRPCServer struct {

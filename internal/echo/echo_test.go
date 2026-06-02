@@ -1,10 +1,10 @@
 /*
- * Copyright Datadatdat.
+ * Copyright Dit.
  */
 package echo
 
 import (
-	"github.com/datadatdat/remote-sdk-go/remote"
+	"github.com/ditdotdev/remote-sdk-go/remote"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

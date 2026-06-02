@@ -1,5 +1,5 @@
 /*
- * Copyright Datadatdat.
+ * Copyright Dit.
  */
 package remote
 
@@ -8,7 +8,7 @@ import (
 	"errors"
 	"testing"
 
-	proto "github.com/datadatdat/remote-sdk-go/internal/proto"
+	proto "github.com/ditdotdev/remote-sdk-go/internal/proto"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"google.golang.org/grpc"

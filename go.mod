@@ -1,4 +1,4 @@
-module github.com/datadatdat/remote-sdk-go
+module github.com/ditdotdev/remote-sdk-go
 
 require (
 	github.com/fatih/structs v1.1.0
