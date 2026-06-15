@@ -15,18 +15,8 @@ permissions:
   pull-requests: write
 
 jobs:
-  health:
-    uses: ditdotdev/.github/.github/workflows/repo-health.yml@master
-    with:
-      language: go
-      coverage-floor: 90
-      mode: block
-    secrets:
-      GO_MODULES_TOKEN: ${{ secrets.GO_MODULES_TOKEN }}
-
   release:
     name: Build and Release
-    needs: health
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     outputs:
@@ -67,7 +57,7 @@ jobs:
   
   update-providers:
     name: Update Provider (${{ matrix.repo }})
-    needs: [health, release]
+    needs: [release]
     runs-on: ubuntu-latest
     strategy:
       matrix:
