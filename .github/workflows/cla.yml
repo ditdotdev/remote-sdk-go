@@ -40,8 +40,9 @@ jobs:
         uses: contributor-assistant/github-action@v2.6.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Fine-grained PAT with Contents read/write on ditdotdev/cla only.
-          PERSONAL_ACCESS_TOKEN: ${{ secrets.CLA_ASSISTANT_PAT }}
+          # Org PAT (same one used for private Go modules); must have
+          # contents write access to ditdotdev/cla for signature commits.
+          PERSONAL_ACCESS_TOKEN: ${{ secrets.GO_MODULES_TOKEN }}
         with:
           remote-organization-name: ditdotdev
           remote-repository-name: cla
