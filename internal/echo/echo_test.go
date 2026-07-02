@@ -1,12 +1,13 @@
-/*
- * Copyright Dit.
- */
+// Copyright Dit 2026
+// SPDX-License-Identifier: BUSL-1.1
+
 package echo
 
 import (
+	"testing"
+
 	"github.com/ditdotdev/remote-sdk-go/remote"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestType(t *testing.T) {

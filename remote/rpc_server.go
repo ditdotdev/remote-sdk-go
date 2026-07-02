@@ -1,6 +1,5 @@
-/*
- * Copyright Dit.
- */
+// Copyright Dit 2026
+// SPDX-License-Identifier: BUSL-1.1
 
 // Package remote provides the core remote plugin infrastructure for Dit.
 package remote

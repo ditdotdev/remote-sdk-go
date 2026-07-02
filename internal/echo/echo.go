@@ -1,6 +1,5 @@
-/*
- * Copyright Dit.
- */
+// Copyright Dit 2026
+// SPDX-License-Identifier: BUSL-1.1
 
 // Package echo provides a sample echo remote implementation for testing and demonstration purposes.
 package echo

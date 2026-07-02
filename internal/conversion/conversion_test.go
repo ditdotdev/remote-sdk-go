@@ -1,3 +1,6 @@
+// Copyright Dit 2026
+// SPDX-License-Identifier: BUSL-1.1
+
 // Package conversion tests cover the bidirectional protobuf Struct
 // <-> Go map conversion utilities.
 package conversion

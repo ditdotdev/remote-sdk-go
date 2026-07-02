@@ -1,6 +1,5 @@
-/*
- * Copyright Datadatdat.
- */
+// Copyright Dit 2026
+// SPDX-License-Identifier: BUSL-1.1
 
 // Package remote tests cover the generated protobuf message types and
 // gRPC stubs. The round-trip Marshal/Unmarshal tests exercise the proto
