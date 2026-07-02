@@ -8,9 +8,9 @@ own dedicated repositories.
 
 ## CI/CD Pipeline
 
-This repository now includes a comprehensive Pull Request 2 workflow with:
+This repository now includes a comprehensive Pull Request workflow with:
 - Cross-platform testing (Ubuntu, Windows, macOS)
-- Multi-version Go support (1.21, 1.22, 1.23)
+- Multi-version Go support
 - Security scanning and code quality checks
 - Coverage reporting and performance benchmarks
 
