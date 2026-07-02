@@ -39,3 +39,4 @@ To run all tests, run `go test -v ./...`.
 ## Releasing
 
 Push a tag of the form `v<X>.<Y>.<Z>`, and publish the draft release in GitHub.
+
