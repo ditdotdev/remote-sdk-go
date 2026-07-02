@@ -1,7 +1,5 @@
-#
-# Copyright Dit.
-#
-
+# Copyright Dit 2026
+# SPDX-License-Identifier: BUSL-1.1
 #
 # When a tag is pushed, build, test, and publish a release immediately.
 # Tests must pass before the release is created.

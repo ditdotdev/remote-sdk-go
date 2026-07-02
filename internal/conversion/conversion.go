@@ -1,6 +1,5 @@
-/*
- * From https://gist.github.com/n3wtron/116fe6661afb749e710ebbd7ef7f2f35
- */
+// Copyright Dit 2026
+// SPDX-License-Identifier: BUSL-1.1
 
 // Package conversion provides protobuf struct conversion utilities.
 package conversion
@@ -13,144 +12,134 @@ import (
 	protobuf_struct "github.com/golang/protobuf/ptypes/struct"
 )
 
-func elabValue(value *protobuf_struct.Value) (interface{}, error) {
-	var err error
-
+// decodeValue converts a single protobuf Value into its Go representation:
+// NullValue -> nil, NumberValue -> float64, StringValue -> string,
+// BoolValue -> bool, StructValue -> map[string]interface{}, and
+// ListValue -> []interface{}. A nil Value decodes to nil; a Value whose
+// Kind is unset is an error.
+func decodeValue(value *protobuf_struct.Value) (interface{}, error) {
 	if value == nil {
 		return nil, nil
 	}
 
-	if structValue, ok := value.GetKind().(*protobuf_struct.Value_StructValue); ok {
-		result := make(map[string]interface{})
-		for k, v := range structValue.StructValue.Fields {
-			result[k], err = elabValue(v)
-			if err != nil {
-				return nil, err
-			}
-		}
-
-		return result, err
-	}
-
-	if listValue, ok := value.GetKind().(*protobuf_struct.Value_ListValue); ok {
-		result := make([]interface{}, len(listValue.ListValue.Values))
-		for i, el := range listValue.ListValue.Values {
-			result[i], err = elabValue(el)
-			if err != nil {
-				return nil, err
-			}
-		}
-
-		return result, err
-	}
-
-	if _, ok := value.GetKind().(*protobuf_struct.Value_NullValue); ok {
+	switch kind := value.GetKind().(type) {
+	case *protobuf_struct.Value_NullValue:
 		return nil, nil
+	case *protobuf_struct.Value_NumberValue:
+		return kind.NumberValue, nil
+	case *protobuf_struct.Value_StringValue:
+		return kind.StringValue, nil
+	case *protobuf_struct.Value_BoolValue:
+		return kind.BoolValue, nil
+	case *protobuf_struct.Value_StructValue:
+		return decodeFields(kind.StructValue.GetFields())
+	case *protobuf_struct.Value_ListValue:
+		values := kind.ListValue.GetValues()
+		result := make([]interface{}, len(values))
+		for i, element := range values {
+			decoded, err := decodeValue(element)
+			if err != nil {
+				return nil, err
+			}
+			result[i] = decoded
+		}
+		return result, nil
+	default:
+		return nil, fmt.Errorf("cannot convert the value %+v", value)
 	}
-
-	if numValue, ok := value.GetKind().(*protobuf_struct.Value_NumberValue); ok {
-		return numValue.NumberValue, nil
-	}
-
-	if strValue, ok := value.GetKind().(*protobuf_struct.Value_StringValue); ok {
-		return strValue.StringValue, nil
-	}
-
-	if boolValue, ok := value.GetKind().(*protobuf_struct.Value_BoolValue); ok {
-		return boolValue.BoolValue, nil
-	}
-
-	return nil, fmt.Errorf("cannot convert the value %+v", value)
 }
 
-// Struct2Map converts a protobuf Struct to a Go map[string]interface{}.
-func Struct2Map(str *protobuf_struct.Struct) (map[string]interface{}, error) {
-	var err error
-
-	result := make(map[string]interface{})
-	if str == nil {
-		return result, nil
-	}
-	for k, v := range str.Fields {
-		result[k], err = elabValue(v)
+// decodeFields converts a protobuf Struct field map into a Go map.
+func decodeFields(fields map[string]*protobuf_struct.Value) (map[string]interface{}, error) {
+	result := make(map[string]interface{}, len(fields))
+	for key, value := range fields {
+		decoded, err := decodeValue(value)
 		if err != nil {
 			return nil, err
 		}
+		result[key] = decoded
 	}
-
-	return result, err
+	return result, nil
 }
 
-func elabEntry(entry interface{}) (*protobuf_struct.Value, error) {
-	var err error
+// Struct2Map converts a protobuf Struct to a Go map[string]interface{}.
+// A nil Struct converts to an empty map.
+func Struct2Map(str *protobuf_struct.Struct) (map[string]interface{}, error) {
+	return decodeFields(str.GetFields())
+}
 
-	if entry == nil {
+// encodeValue converts a Go value into a protobuf Value. Exact string and
+// bool types are matched first; remaining values are handled by reflection
+// so that numeric types of any width (including named types) become
+// NumberValue. Named string and bool types are deliberately rejected: the
+// wire representation would silently discard the type, so callers must
+// convert explicitly.
+func encodeValue(entry interface{}) (*protobuf_struct.Value, error) {
+	switch typed := entry.(type) {
+	case nil:
 		return &protobuf_struct.Value{Kind: &protobuf_struct.Value_NullValue{}}, nil
+	case string:
+		return &protobuf_struct.Value{Kind: &protobuf_struct.Value_StringValue{StringValue: typed}}, nil
+	case bool:
+		return &protobuf_struct.Value{Kind: &protobuf_struct.Value_BoolValue{BoolValue: typed}}, nil
 	}
 
-	rt := reflect.TypeOf(entry)
-	switch rt.Kind() {
-	case reflect.String:
-		if realValue, ok := entry.(string); ok {
-			return &protobuf_struct.Value{Kind: &protobuf_struct.Value_StringValue{StringValue: realValue}}, nil
-		}
-
-		return nil, fmt.Errorf("cannot convert string value")
+	reflected := reflect.ValueOf(entry)
+	switch reflected.Kind() {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		return &protobuf_struct.Value{Kind: &protobuf_struct.Value_NumberValue{NumberValue: float64(reflect.ValueOf(entry).Int())}}, nil
+		return numberValue(float64(reflected.Int())), nil
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-		return &protobuf_struct.Value{Kind: &protobuf_struct.Value_NumberValue{NumberValue: float64(reflect.ValueOf(entry).Uint())}}, nil
+		return numberValue(float64(reflected.Uint())), nil
 	case reflect.Float32, reflect.Float64:
-		return &protobuf_struct.Value{Kind: &protobuf_struct.Value_NumberValue{NumberValue: reflect.ValueOf(entry).Float()}}, nil
+		return numberValue(reflected.Float()), nil
+	case reflect.String:
+		return nil, fmt.Errorf("cannot convert string value")
 	case reflect.Bool:
-		if realValue, ok := entry.(bool); ok {
-			return &protobuf_struct.Value{Kind: &protobuf_struct.Value_BoolValue{BoolValue: realValue}}, nil
-		}
-
 		return nil, fmt.Errorf("cannot convert boolean value")
 	case reflect.Array, reflect.Slice:
-		lstEntry := reflect.ValueOf(entry)
-
-		lstValue := &protobuf_struct.ListValue{Values: make([]*protobuf_struct.Value, lstEntry.Len())}
-		for i := 0; i < lstEntry.Len(); i++ {
-			lstValue.Values[i], err = elabEntry(lstEntry.Index(i).Interface())
+		values := make([]*protobuf_struct.Value, reflected.Len())
+		for i := range values {
+			encoded, err := encodeValue(reflected.Index(i).Interface())
 			if err != nil {
 				return nil, err
 			}
+			values[i] = encoded
 		}
-
-		return &protobuf_struct.Value{Kind: &protobuf_struct.Value_ListValue{ListValue: lstValue}}, nil
-	case reflect.Struct:
-		return elabEntry(structs.Map(entry))
+		return &protobuf_struct.Value{Kind: &protobuf_struct.Value_ListValue{
+			ListValue: &protobuf_struct.ListValue{Values: values},
+		}}, nil
 	case reflect.Map:
-		mapEntry := make(map[string]interface{})
-
-		entryValue := reflect.ValueOf(entry)
-		for _, k := range entryValue.MapKeys() {
-			mapEntry[k.String()] = entryValue.MapIndex(k).Interface()
+		asMap := make(map[string]interface{}, reflected.Len())
+		for _, key := range reflected.MapKeys() {
+			asMap[key.String()] = reflected.MapIndex(key).Interface()
 		}
-
-		structVal, err := Map2Struct(mapEntry)
-
-		return &protobuf_struct.Value{Kind: &protobuf_struct.Value_StructValue{StructValue: structVal}}, err
+		encoded, err := Map2Struct(asMap)
+		if err != nil {
+			return nil, err
+		}
+		return &protobuf_struct.Value{Kind: &protobuf_struct.Value_StructValue{StructValue: encoded}}, nil
+	case reflect.Struct:
+		return encodeValue(structs.Map(entry))
+	default:
+		return nil, fmt.Errorf("cannot convert [%+v] kind:%s", entry, reflected.Kind())
 	}
+}
 
-	return nil, fmt.Errorf("cannot convert [%+v] kind:%s", entry, rt.Kind())
+func numberValue(number float64) *protobuf_struct.Value {
+	return &protobuf_struct.Value{Kind: &protobuf_struct.Value_NumberValue{NumberValue: number}}
 }
 
 // Map2Struct converts a Go map[string]interface{} to a protobuf Struct.
 func Map2Struct(input map[string]interface{}) (*protobuf_struct.Struct, error) {
-	var err error
-
-	result := &protobuf_struct.Struct{Fields: make(map[string]*protobuf_struct.Value)}
-	for k, v := range input {
-		result.Fields[k], err = elabEntry(v)
+	result := &protobuf_struct.Struct{Fields: make(map[string]*protobuf_struct.Value, len(input))}
+	for key, value := range input {
+		encoded, err := encodeValue(value)
 		if err != nil {
 			return nil, err
 		}
+		result.Fields[key] = encoded
 	}
-
-	return result, err
+	return result, nil
 }
 
 // Struct2ProtobufStruct converts any interface{} to a protobuf Struct.
