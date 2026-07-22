@@ -51,7 +51,10 @@ jobs:
             --title "Release $TAG_NAME" \
             --notes "Release $TAG_NAME"
         env:
-          GH_TOKEN: ${{ secrets.GO_MODULES_TOKEN }}
+          # Same-repo release creation uses the workflow's built-in token
+          # (contents: write above). GO_MODULES_TOKEN is a read-scoped PAT
+          # for private Go modules and cannot write releases (403).
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   
   update-providers:
     name: Update Provider (${{ matrix.repo }})
