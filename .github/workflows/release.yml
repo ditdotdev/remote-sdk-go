@@ -86,8 +86,12 @@ jobs:
       
       - name: Configure Git
         run: |
-          git config --global user.name "dit-bot"
-          git config --global user.email "bot@dit.dev"
+          # Commit as github-actions[bot] so the CLA check passes: the
+          # allowlist in every repo's cla.yml covers github-actions[bot],
+          # whereas a made-up identity (dit-bot <bot@dit.dev>) maps to no
+          # GitHub account and can never sign.
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --global url."https://${{ secrets.GO_MODULES_TOKEN }}@github.com/".insteadOf "https://github.com/"
       
       - name: Update dependency
