@@ -61,6 +61,10 @@ jobs:
     needs: [release]
     runs-on: ubuntu-latest
     strategy:
+      # Provider updates are independent; one repo's failure must not
+      # cancel the others (run 29938648960 lost 4 provider PRs to a
+      # single ssh-remote-go permission error).
+      fail-fast: false
       matrix:
         repo:
           - s3-remote-go
